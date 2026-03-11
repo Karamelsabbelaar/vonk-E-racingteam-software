@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartPit — Agenda</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes neon-glow {
+      0%, 100% { text-shadow: 0 0 10px rgba(232,0,45,0.5); }
+      50% { text-shadow: 0 0 20px rgba(232,0,45,0.8); }
+    }
+
+    .section-title::before {
+      animation: neon-glow 2s ease-in-out infinite;
+    }
+
+    .page-header { animation: fadeInDown 0.6s ease-out; }
+    .card { animation: fadeInUp 0.6s ease-out; transition: all 0.3s ease; }
+    .card:hover { box-shadow: 0 8px 32px rgba(232,0,45,0.15); }
+
+    .agenda-row {
+      animation: fadeInUp 0.5s ease-out both;
+      transition: all 0.3s ease;
+    }
+
+    .agenda-row:nth-child(1) { animation-delay: 0.1s; }
+    .agenda-row:nth-child(2) { animation-delay: 0.2s; }
+    .agenda-row:nth-child(3) { animation-delay: 0.3s; }
+    .agenda-row:nth-child(4) { animation-delay: 0.4s; }
+    .agenda-row:nth-child(5) { animation-delay: 0.5s; }
+    .agenda-row:nth-child(n+6) { animation-delay: 0.6s; }
+
+    .agenda-row:hover {
+      background: rgba(232,0,45,0.05);
+      transform: translateX(4px);
+    }
+
+    .agenda-dot {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(232,0,45,0.7); }
+      50% { box-shadow: 0 0 0 8px rgba(232,0,45,0); }
+    }
+
+    .agenda-event {
+      transition: color 0.3s ease;
+    }
+
+    .agenda-row:hover .agenda-event {
+      color: var(--red);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <a href="/" class="nav-logo">
+          <span class="flag">🏁</span>KART<span>PIT</span>
+        </a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/tracks">Tracks</a>
+          <a href="/pitstop">Pitstop</a>
+          <a href="/agenda" class="active">Agenda</a>
+          <a href="/checklist">Checklist</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <main class="page-content">
+      <div class="page-header">
+        <div class="eyebrow">Race Day</div>
+        <h1>RACE AGENDA</h1>
+        <p class="subtitle">Today's full schedule — sessions, briefings, races</p>
+      </div>
+
+      <div class="card" style="margin-bottom:40px">
+        <h3 class="section-title" style="margin-bottom:16px">Add Event</h3>
+        <div class="form-row">
+          <div class="form-group" style="max-width:120px">
+            <label class="form-label">Time</label>
+            <input type="time" id="ev-time" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Event Description</label>
+            <input type="text" id="ev-desc" placeholder="e.g. Free practice 30 min" />
+          </div>
+          <div class="form-group" style="max-width:180px">
+            <label class="form-label">Type</label>
+            <select id="ev-type">
+              <option value="admin">Admin</option>
+              <option value="briefing">Briefing</option>
+              <option value="session">Practice Session</option>
+              <option value="qualifying">Qualifying</option>
+              <option value="race">Race</option>
+              <option value="pitstop">Pitstop Practice</option>
+              <option value="break">Break</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button onclick="addEvent()" class="btn btn-red">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <h2 class="section-title">Schedule</h2>
+      </div>
+
+      <div class="agenda-list" id="agenda-list">
+        <% agenda.forEach((item, index) => { %>
+        <div class="agenda-row" data-id="<%= item.id %>">
+          <div class="agenda-time-col">
+            <div class="agenda-time"><%= item.time %></div>
+          </div>
+          <div class="agenda-dot-col">
+            <div class="agenda-dot" style="
+              <% 
+                if (item.type === 'race') { %>background:var(--red)<%
+                } else if (item.type === 'qualifying') { %>background:var(--yellow)<%
+                } else if (item.type === 'session') { %>background:var(--blue)<%
+                } else if (item.type === 'pitstop') { %>background:var(--green)<%
+                } else { %>background:var(--text3)<%
+                }
+              %>
+            "></div>
+            <% if (index < agenda.length - 1) { %><div class="agenda-line"></div><% } %>
+          </div>
+          <div class="agenda-content">
+            <div class="agenda-event"><%= item.event %></div>
+            <% 
+              let badgeClass = 'badge-gray';
+              if (item.type === 'race') badgeClass = 'badge-red';
+              else if (item.type === 'qualifying') badgeClass = 'badge-yellow';
+              else if (item.type === 'session') badgeClass = 'badge-blue';
+              else if (item.type === 'pitstop') badgeClass = 'badge-green';
+            %>
+            <span class="badge <%= badgeClass %>"><%= item.type %></span>
+            <button onclick="deleteEvent(<%= item.id %>)" class="btn btn-ghost btn-sm" style="margin-left:8px;opacity:0.5">✕</button>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      KartPit &mdash; Amateur Karting Race Manager &mdash; Built with 🏎️
+    </footer>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script src="/main.js"></script>
+  <script>
+    async function addEvent() {
+      const time = document.getElementById('ev-time').value;
+      const desc = document.getElementById('ev-desc').value.trim();
+      const type = document.getElementById('ev-type').value;
+      if (!time || !desc) { Toast.show('Fill in time and description', 'error'); return; }
+      const res = await API.post('/api/agenda/add', { time, event: desc, type });
+      if (res.ok) { Toast.show('Event added', 'success'); setTimeout(() => location.reload(), 800); }
+    }
+
+    async function deleteEvent(id) {
+      const res = await API.delete(`/api/agenda/${id}`);
+      if (res.ok) {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        if (el) el.remove();
+        Toast.show('Event removed', 'success');
+      }
+    }
+  </script>
+</body>
+</html>

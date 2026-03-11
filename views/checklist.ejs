@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartPit — Checklist</title>
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes neon-glow {
+      0%, 100% { text-shadow: 0 0 10px rgba(232,0,45,0.5); }
+      50% { text-shadow: 0 0 20px rgba(232,0,45,0.8); }
+    }
+
+    @keyframes checkmark {
+      0% { transform: scale(0) rotate(-45deg); }
+      50% { transform: scale(1.2) rotate(10deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+
+    .section-title::before {
+      animation: neon-glow 2s ease-in-out infinite;
+    }
+
+    .page-header { animation: fadeInDown 0.6s ease-out; }
+    .card { animation: fadeInUp 0.6s ease-out; transition: all 0.3s ease; }
+    .card:hover { box-shadow: 0 8px 32px rgba(232,0,45,0.15); }
+
+    .checklist-item {
+      animation: fadeInUp 0.5s ease-out both;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .checklist-item:nth-child(1) { animation-delay: 0.05s; }
+    .checklist-item:nth-child(2) { animation-delay: 0.1s; }
+    .checklist-item:nth-child(3) { animation-delay: 0.15s; }
+    .checklist-item:nth-child(4) { animation-delay: 0.2s; }
+    .checklist-item:nth-child(5) { animation-delay: 0.25s; }
+    .checklist-item:nth-child(n+6) { animation-delay: 0.3s; }
+
+    .checklist-item:hover {
+      transform: translateX(8px);
+      background: rgba(232,0,45,0.05);
+    }
+
+    .checklist-item.done .tick {
+      animation: checkmark 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .check-box {
+      transition: all 0.3s ease;
+    }
+
+    .checklist-item.done .check-box {
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(0,200,83,0.4);
+    }
+
+    .card-value {
+      transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .card:hover .card-value {
+      transform: scale(1.05);
+      color: var(--red);
+    }
+
+    .progress-bar-fill {
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <a href="/" class="nav-logo">
+          <span class="flag">🏁</span>KART<span>PIT</span>
+        </a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/tracks">Tracks</a>
+          <a href="/pitstop">Pitstop</a>
+          <a href="/agenda">Agenda</a>
+          <a href="/checklist" class="active">Checklist</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page Content -->
+    <main class="page-content">
+      <div class="page-header">
+        <div class="eyebrow">Race Preparation</div>
+        <h1>PRE-RACE CHECKLIST</h1>
+        <p class="subtitle">Kart components and team readiness before the grid</p>
+      </div>
+
+      <div class="card card-red" style="margin-bottom:32px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div>
+            <div class="card-title">Overall Readiness</div>
+            <div style="font-family:var(--font-display);font-size:48px" id="pct-all">0%</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:14px;color:var(--text2)" id="label-all">0 / 0</div>
+            <button onclick="resetChecklist()" class="btn btn-outline btn-sm" style="margin-top:8px">↺ Reset All</button>
+          </div>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-all" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:32px">
+        <h3 class="section-title" style="margin-bottom:16px">Add Item</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Item</label>
+            <input type="text" id="new-item-text" placeholder="e.g. Spare tyre set loaded" />
+          </div>
+          <div class="form-group" style="max-width:200px">
+            <label class="form-label">Category</label>
+            <select id="new-item-cat">
+              <option value="components">Kart / Components</option>
+              <option value="people">People / Team</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button onclick="addItem()" class="btn btn-red">+ Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="checklist-grid">
+        <div>
+          <div class="section-header">
+            <h2 class="section-title">🔧 Kart Components</h2>
+            <span style="font-size:13px;color:var(--text3)" id="label-components">0 / 0</span>
+          </div>
+          <div class="progress-bar-wrap" style="margin-bottom:20px">
+            <div class="progress-bar-fill" id="progress-components" style="background:var(--red);width:0%"></div>
+          </div>
+          <div id="list-components">
+            <% checklist.components.forEach((item, index) => { %>
+            <div class="checklist-item <% if (item.done) { %>done<% } %>"
+                 data-id="<%= item.id %>" data-category="components">
+              <div class="check-box"><span class="tick">✓</span></div>
+              <div class="check-text"><%= item.item %></div>
+            </div>
+            <% }); %>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-header">
+            <h2 class="section-title">👤 People & Team</h2>
+            <span style="font-size:13px;color:var(--text3)" id="label-people">0 / 0</span>
+          </div>
+          <div class="progress-bar-wrap" style="margin-bottom:20px">
+            <div class="progress-bar-fill" id="progress-people" style="background:var(--yellow);width:0%"></div>
+          </div>
+          <div id="list-people">
+            <% checklist.people.forEach((item, index) => { %>
+            <div class="checklist-item <% if (item.done) { %>done<% } %>"
+                 data-id="<%= item.id %>" data-category="people">
+              <div class="check-box"><span class="tick">✓</span></div>
+              <div class="check-text"><%= item.item %></div>
+            </div>
+            <% }); %>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      KartPit &mdash; Amateur Karting Race Manager &mdash; Built with 🏎️
+    </footer>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script src="/main.js"></script>
+  <script src="/checklist.js"></script>
+</body>
+</html>

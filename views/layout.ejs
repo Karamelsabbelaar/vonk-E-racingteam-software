@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}KartPit{% endblock %}</title>
-  <link rel="stylesheet" href="/static/css/style.css" />
-  {% block extra_css %}{% endblock %}
+  <title><%= title || 'KartPit' %></title>
+  <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
 <div class="wrapper">
@@ -28,7 +27,7 @@
 
   <!-- Page Content -->
   <main class="page-content">
-    {% block content %}{% endblock %}
+    <%- body %>
   </main>
 
   <!-- Footer -->
@@ -41,7 +40,6 @@
 <!-- Toast Container -->
 <div id="toast-container"></div>
 
-<script src="/static/js/main.js"></script>
-{% block extra_js %}{% endblock %}
+<script src="/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,25 @@
+{
+  "name": "kartpit",
+  "version": "1.0.0",
+  "description": "Amateur Kart Race Management App - Cross-platform (Windows, macOS, Linux, Android, iOS)",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "kart racing",
+    "race management",
+    "pitstop timer",
+    "agenda scheduler"
+  ],
+  "author": "Vonk E-Racing Team",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "ejs": "^5.0.1",
+    "express": "^4.18.2"
+  }
+}
