@@ -97,7 +97,7 @@ const PitTimer = (() => {
     let color = '';
     if (targetMs && ms <= targetMs) color = 'style="color:var(--green)"';
     else if (targetMs)              color = 'style="color:var(--red)"';
-    const date = new Date(stop.created_at).toLocaleString('nl-NL-Nederland', { dateStyle:'short', timeStyle:'short' });
+    const date = new Date(stop.created_at).toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'short' });
     return `
       <div class="stop-row" id="stop-${stop.id}">
         <div class="stop-time" ${color}>${disp}</div>
