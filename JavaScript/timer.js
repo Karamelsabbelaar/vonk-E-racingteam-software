@@ -1,53 +1,45 @@
 /**
  * KartPit — Pitstop Timer
- * Stopwatch with save, history, and target time feature
+ * Slaat op in Supabase, live zichtbaar voor het hele team
  */
 
 const PitTimer = (() => {
-  let startTime   = null;
-  let elapsed     = 0;
-  let running     = false;
-  let rafId       = null;
-  let targetMs    = null;
+  let startTime = null, elapsed = 0, running = false, rafId = null, targetMs = null;
 
-  const display   = document.getElementById('timer-display');
-  const startBtn  = document.getElementById('btn-start');
-  const stopBtn   = document.getElementById('btn-stop');
-  const resetBtn  = document.getElementById('btn-reset');
-  const saveBtn   = document.getElementById('btn-save');
-  const targetIn  = document.getElementById('target-time');
-  const histList  = document.getElementById('stop-history');
+  const display  = () => document.getElementById('timer-display');
+  const startBtn = () => document.getElementById('btn-start');
+  const stopBtn  = () => document.getElementById('btn-stop');
+  const saveBtn  = () => document.getElementById('btn-save');
 
   function tick() {
     if (!running) return;
     elapsed = Date.now() - startTime;
     render(elapsed);
-
-    // colour feedback vs target
-    if (targetMs) {
-      if (elapsed < targetMs * 0.9) display.className = 'timer-display';
-      else if (elapsed < targetMs)  display.className = 'timer-display running';
-      else                          display.className = 'timer-display stopped';
+    const t = targetMs;
+    if (t) {
+      display().className = elapsed < t * 0.9 ? 'timer-display'
+                          : elapsed < t       ? 'timer-display running'
+                          :                     'timer-display stopped';
     } else {
-      display.className = 'timer-display running';
+      display().className = 'timer-display running';
     }
     rafId = requestAnimationFrame(tick);
   }
 
   function render(ms) {
-    const minutes = String(Math.floor(ms / 60000)).padStart(2, '0');
-    const seconds = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
-    const millis  = String(Math.floor((ms % 1000) / 10)).padStart(2, '0');
-    display.textContent = `${minutes}:${seconds}.${millis}`;
+    const m = String(Math.floor(ms / 60000)).padStart(2,'0');
+    const s = String(Math.floor((ms % 60000) / 1000)).padStart(2,'0');
+    const c = String(Math.floor((ms % 1000) / 10)).padStart(2,'0');
+    display().textContent = `${m}:${s}.${c}`;
   }
 
   function start() {
     if (running) return;
     running   = true;
     startTime = Date.now() - elapsed;
-    targetMs  = targetIn ? (parseFloat(targetIn.value) * 1000 || null) : null;
-    startBtn.disabled = true;
-    stopBtn.disabled  = false;
+    targetMs  = (parseFloat(document.getElementById('target-time')?.value) * 1000) || null;
+    startBtn().disabled = true;
+    stopBtn().disabled  = false;
     rafId = requestAnimationFrame(tick);
   }
 
@@ -55,117 +47,111 @@ const PitTimer = (() => {
     if (!running) return;
     running = false;
     cancelAnimationFrame(rafId);
-    display.className = 'timer-display stopped';
-    startBtn.disabled = false;
-    stopBtn.disabled  = true;
-    saveBtn.disabled  = false;
+    display().className = 'timer-display stopped';
+    startBtn().disabled = false;
+    stopBtn().disabled  = true;
+    saveBtn().disabled  = false;
   }
 
   function reset() {
     stop();
     elapsed = 0;
     render(0);
-    display.className = 'timer-display';
-    saveBtn.disabled  = true;
+    display().className = 'timer-display';
+    saveBtn().disabled  = true;
   }
 
   async function saveStop() {
-    const labelIn = document.getElementById('stop-label');
-    const notesIn = document.getElementById('stop-notes');
-    const label   = labelIn ? labelIn.value.trim() || 'Pitstop' : 'Pitstop';
-    const notes   = notesIn ? notesIn.value.trim() : '';
-
-    const payload = {
-      duration: elapsed,
-      label,
-      notes
-    };
-
-    const res = await API.post('/api/pitstops/save', payload);
-    if (res.ok) {
-      Toast.show(`✓ Saved: ${(elapsed/1000).toFixed(2)}s`, 'success');
+    const label = document.getElementById('stop-label')?.value.trim() || 'Pitstop';
+    const notes = document.getElementById('stop-notes')?.value.trim() || '';
+    try {
+      await Pitstops.save(elapsed, label, notes);
+      Toast.show(`✓ Opgeslagen: ${(elapsed/1000).toFixed(2)}s`, 'success');
       Modal.close('save-modal');
-      await loadHistory();
-      if (labelIn) labelIn.value = '';
-      if (notesIn) notesIn.value = '';
+      document.getElementById('stop-label').value = '';
+      document.getElementById('stop-notes').value = '';
       reset();
-    } else {
-      Toast.show('Save failed', 'error');
+      await loadHistory();
+    } catch(e) {
+      Toast.show('Opslaan mislukt: ' + e.message, 'error');
     }
   }
 
   async function deleteStop(id) {
-    const res = await API.delete(`/api/pitstops/${id}`);
-    if (res.ok) {
-      Toast.show('Stop removed', 'success');
+    try {
+      await Pitstops.remove(id);
+      Toast.show('Stop verwijderd', 'success');
       await loadHistory();
+    } catch(e) {
+      Toast.show('Verwijderen mislukt', 'error');
     }
   }
 
-  function stopRow(stop) {
-    const ms   = stop.duration;
-    const sec  = (ms / 1000).toFixed(2);
+  function stopRow(stop, targetMs) {
+    const ms  = stop.duration_ms;
+    const sec = (ms / 1000).toFixed(2);
     const mins = Math.floor(ms / 60000);
-    const secs = ((ms % 60000) / 1000).toFixed(2);
-    const disp = mins > 0 ? `${mins}:${secs.padStart(5,'0')}` : `${sec}s`;
-
-    let colorClass = '';
-    if (targetMs && ms <= targetMs) colorClass = 'style="color:var(--green)"';
-    else if (targetMs)              colorClass = 'style="color:var(--red)"';
-
+    const disp = mins > 0
+      ? `${mins}:${((ms % 60000)/1000).toFixed(2).padStart(5,'0')}`
+      : `${sec}s`;
+    let color = '';
+    if (targetMs && ms <= targetMs) color = 'style="color:var(--green)"';
+    else if (targetMs)              color = 'style="color:var(--red)"';
+    const date = new Date(stop.created_at).toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'short' });
     return `
       <div class="stop-row" id="stop-${stop.id}">
-        <div class="stop-time" ${colorClass}>${disp}</div>
+        <div class="stop-time" ${color}>${disp}</div>
         <div class="stop-label">
           <strong>${stop.label}</strong>
           ${stop.notes ? `<br><span style="font-size:13px;color:var(--text3)">${stop.notes}</span>` : ''}
         </div>
-        <div class="stop-date">${stop.date}</div>
+        <div class="stop-date">${date}</div>
         <button class="btn btn-ghost btn-sm" onclick="PitTimer.del(${stop.id})">✕</button>
       </div>`;
   }
 
   async function loadHistory() {
-    if (!histList) return;
-    const data = await API.get('/api/pitstops');
-    if (!data.length) {
-      histList.innerHTML = '<p style="color:var(--text3);text-align:center;padding:32px 0">No stops recorded yet</p>';
-      return;
+    const list = document.getElementById('stop-history');
+    if (!list) return;
+    try {
+      const data = await Pitstops.getAll();
+      if (!data.length) {
+        list.innerHTML = '<p style="color:var(--text3);text-align:center;padding:32px 0">Nog geen stops opgeslagen</p>';
+        ['stat-best','stat-avg','stat-worst','stat-count'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = id === 'stat-count' ? '0' : '–';
+        });
+        return;
+      }
+      list.innerHTML = data.map(s => stopRow(s, targetMs)).join('');
+      const times = data.map(d => d.duration_ms);
+      const set   = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('stat-best',  (Math.min(...times)/1000).toFixed(2) + 's');
+      set('stat-avg',   (times.reduce((a,b)=>a+b,0)/times.length/1000).toFixed(2) + 's');
+      set('stat-worst', (Math.max(...times)/1000).toFixed(2) + 's');
+      set('stat-count', data.length);
+    } catch(e) {
+      list.innerHTML = `<p style="color:var(--red)">Fout bij laden: ${e.message}</p>`;
     }
-    // Sort newest first
-    const sorted = [...data].sort((a,b) => b.id - a.id);
-    histList.innerHTML = sorted.map(stopRow).join('');
-
-    // Stats
-    const times = data.map(d => d.duration);
-    const best  = Math.min(...times);
-    const avg   = times.reduce((a,b) => a+b, 0) / times.length;
-    const worst = Math.max(...times);
-
-    const el = id => document.getElementById(id);
-    if (el('stat-best'))  el('stat-best').textContent  = (best/1000).toFixed(2) + 's';
-    if (el('stat-avg'))   el('stat-avg').textContent   = (avg/1000).toFixed(2)  + 's';
-    if (el('stat-worst')) el('stat-worst').textContent = (worst/1000).toFixed(2)+ 's';
-    if (el('stat-count')) el('stat-count').textContent = data.length;
   }
 
-  // Public API
   return { start, stop, reset, save: saveStop, del: deleteStop, load: loadHistory };
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Wire buttons
   document.getElementById('btn-start')?.addEventListener('click', PitTimer.start);
   document.getElementById('btn-stop')?.addEventListener('click',  PitTimer.stop);
   document.getElementById('btn-reset')?.addEventListener('click', PitTimer.reset);
   document.getElementById('btn-save')?.addEventListener('click',  () => Modal.open('save-modal'));
   document.getElementById('btn-confirm-save')?.addEventListener('click', PitTimer.save);
 
-  // Keyboard shortcut: Space = start/stop, R = reset
+  // Realtime: als een teamlid een stop opslaat, ziet iedereen het meteen
+  Realtime.onPitstopChange(() => PitTimer.load());
+
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    if (e.code === 'Space')  { e.preventDefault(); document.getElementById('btn-start').disabled ? PitTimer.stop() : PitTimer.start(); }
-    if (e.code === 'KeyR')   { PitTimer.reset(); }
+    if (e.code === 'Space') { e.preventDefault(); document.getElementById('btn-start').disabled ? PitTimer.stop() : PitTimer.start(); }
+    if (e.code === 'KeyR')  PitTimer.reset();
   });
 
   PitTimer.load();

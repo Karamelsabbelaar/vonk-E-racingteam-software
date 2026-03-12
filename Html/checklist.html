@@ -1,97 +1,107 @@
-{% extends "base.html" %}
-{% block title %}KartPit — Pre-Race Checklist{% endblock %}
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartPit — Checklist</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="wrapper">
 
-{% block content %}
-<div class="page-header">
-  <div class="eyebrow">Race Preparation</div>
-  <h1>PRE-RACE CHECKLIST</h1>
-  <p class="subtitle">Kart components and team readiness before the grid</p>
-</div>
-
-<!-- Overall Progress -->
-<div class="card card-red" style="margin-bottom:32px">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-    <div>
-      <div class="card-title">Overall Readiness</div>
-      <div style="font-family:var(--font-display);font-size:48px" id="pct-all">0%</div>
-    </div>
-    <div style="text-align:right">
-      <div style="font-size:14px;color:var(--text2)" id="label-all">0 / 0</div>
-      <button onclick="resetChecklist()" class="btn btn-outline btn-sm" style="margin-top:8px">↺ Reset All</button>
-    </div>
-  </div>
-  <div class="progress-bar-wrap">
-    <div class="progress-bar-fill" id="progress-all" style="width:0%"></div>
-  </div>
-</div>
-
-<!-- Add New Item -->
-<div class="card" style="margin-bottom:32px">
-  <h3 class="section-title" style="margin-bottom:16px">Add Item</h3>
-  <div class="form-row">
-    <div class="form-group">
-      <label class="form-label">Item</label>
-      <input type="text" id="new-item-text" placeholder="e.g. Spare tyre set loaded" />
-    </div>
-    <div class="form-group" style="max-width:200px">
-      <label class="form-label">Category</label>
-      <select id="new-item-cat">
-        <option value="components">Kart / Components</option>
-        <option value="people">People / Team</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:flex-end">
-      <button onclick="addItem()" class="btn btn-red">+ Add</button>
-    </div>
-  </div>
-</div>
-
-<!-- Checklist Grid -->
-<div class="checklist-grid">
-
-  <!-- Kart Components -->
-  <div>
-    <div class="section-header">
-      <h2 class="section-title">🔧 Kart Components</h2>
-      <span style="font-size:13px;color:var(--text3)" id="label-components">0 / 0</span>
-    </div>
-    <div class="progress-bar-wrap" style="margin-bottom:20px">
-      <div class="progress-bar-fill" id="progress-components" style="background:var(--red);width:0%"></div>
-    </div>
-    <div id="list-components">
-      {% for item in checklist.components %}
-      <div class="checklist-item {% if item.done %}done{% endif %}"
-           data-id="{{ item.id }}" data-category="components">
-        <div class="check-box"><span class="tick">✓</span></div>
-        <div class="check-text">{{ item.item }}</div>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="nav-logo"><span class="flag">🏁</span>KART<span>PIT</span></a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="tracks.html">Tracks</a>
+        <a href="pitstop.html">Pitstop</a>
+        <a href="agenda.html">Agenda</a>
+        <a href="checklist.html">Checklist</a>
       </div>
-      {% endfor %}
     </div>
-  </div>
+  </nav>
 
-  <!-- People -->
-  <div>
-    <div class="section-header">
-      <h2 class="section-title">👤 People & Team</h2>
-      <span style="font-size:13px;color:var(--text3)" id="label-people">0 / 0</span>
+  <main class="page-content">
+
+    <div class="page-header">
+      <div class="eyebrow">Race Voorbereiding</div>
+      <h1>PRE-RACE CHECKLIST</h1>
+      <p class="subtitle">Kart onderdelen en team gereedheid — live voor iedereen zichtbaar</p>
     </div>
-    <div class="progress-bar-wrap" style="margin-bottom:20px">
-      <div class="progress-bar-fill" id="progress-people" style="background:var(--yellow);width:0%"></div>
-    </div>
-    <div id="list-people">
-      {% for item in checklist.people %}
-      <div class="checklist-item {% if item.done %}done{% endif %}"
-           data-id="{{ item.id }}" data-category="people">
-        <div class="check-box"><span class="tick">✓</span></div>
-        <div class="check-text">{{ item.item }}</div>
+
+    <!-- Overall progress -->
+    <div class="card card-red" style="margin-bottom:32px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div class="card-title">Totale Gereedheid</div>
+          <div style="font-family:var(--font-display);font-size:48px" id="pct-all">–</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:14px;color:var(--text2)" id="label-all">laden…</div>
+          <button onclick="resetChecklist()" class="btn btn-outline btn-sm" style="margin-top:8px">↺ Reset Alles</button>
+        </div>
       </div>
-      {% endfor %}
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-all" style="width:0%"></div>
+      </div>
     </div>
-  </div>
 
+    <!-- Item toevoegen -->
+    <div class="card" style="margin-bottom:32px">
+      <h3 class="section-title" style="margin-bottom:16px">Item Toevoegen</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Item</label>
+          <input type="text" id="new-item-text" placeholder="bijv. Extra bandenset geladen" />
+        </div>
+        <div class="form-group" style="max-width:220px">
+          <label class="form-label">Categorie</label>
+          <select id="new-item-cat">
+            <option value="components">Kart / Onderdelen</option>
+            <option value="people">Mensen / Team</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button onclick="addItem()" class="btn btn-red">+ Toevoegen</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklist grid -->
+    <div class="checklist-grid">
+      <div>
+        <div class="section-header">
+          <h2 class="section-title">🔧 Kart & Onderdelen</h2>
+          <span style="font-size:13px;color:var(--text3)" id="label-components">–</span>
+        </div>
+        <div class="progress-bar-wrap" style="margin-bottom:20px">
+          <div class="progress-bar-fill" id="progress-components" style="background:var(--red);width:0%"></div>
+        </div>
+        <div id="list-components"><p style="color:var(--text3)">Laden…</p></div>
+      </div>
+      <div>
+        <div class="section-header">
+          <h2 class="section-title">👤 Mensen & Team</h2>
+          <span style="font-size:13px;color:var(--text3)" id="label-people">–</span>
+        </div>
+        <div class="progress-bar-wrap" style="margin-bottom:20px">
+          <div class="progress-bar-fill" id="progress-people" style="background:var(--yellow);width:0%"></div>
+        </div>
+        <div id="list-people"><p style="color:var(--text3)">Laden…</p></div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">KartPit &mdash; Amateur Karting Race Manager &mdash; 🏎️</footer>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script src="/static/js/checklist.js"></script>
-{% endblock %}
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.config.js"></script>
+<script src="../js/main.js"></script>
+<script src="../js/checklist.js"></script>
+</body>
+</html>

@@ -1,92 +1,104 @@
-# 🏁 KartPit — Amateur Kart Race Manager
+# 🏁 KartPit — Setup Handleiding
 
-A dark-themed, F1-inspired web app for managing your race day.
-Built with HTML + CSS + Vanilla JS frontend and a Python Flask backend.
-
----
-
-## Features
-
-| Page        | Description                                              |
-|-------------|----------------------------------------------------------|
-| **Home**    | Dashboard with stats, quick nav, today's agenda preview  |
-| **Tracks**  | Circuit database with lap times and corner notes         |
-| **Pitstop** | Live stopwatch timer with history, stats & save to file  |
-| **Agenda**  | Race day timeline — add/remove sessions                  |
-| **Checklist** | Pre-race kart + team readiness with progress bars      |
-
----
-
-## File Structure
+## Bestandsstructuur
 
 ```
-kartapp/
-├── app.py                  ← Flask backend + all API routes
-├── requirements.txt
-├── data/                   ← JSON data files (auto-created)
-│   ├── checklist.json
-│   ├── agenda.json
-│   ├── pitstops.json
-│   └── tracks.json
-├── static/
-│   ├── css/
-│   │   └── style.css       ← Full dark racing theme
-│   └── js/
-│       ├── main.js         ← Shared utils, API helper, toast
-│       ├── timer.js        ← Pitstop stopwatch logic
-│       └── checklist.js    ← Checklist toggle + progress
-└── templates/
-    ├── base.html           ← Navbar + layout wrapper
-    ├── index.html          ← Home page
-    ├── tracks.html         ← Circuits page
-    ├── pitstop.html        ← Pitstop timer page
-    ├── agenda.html         ← Race agenda page
-    └── checklist.html      ← Pre-race checklist page
+kartpit/
+├── index.html                  ← Homepagina
+├── supabase_setup.sql          ← Database setup script
+├── css/
+│   └── style.css               ← Donker racing thema
+├── js/
+│   ├── supabase.config.js      ← 🔑 Jouw Supabase sleutels + data laag
+│   ├── main.js                 ← Gedeelde utilities (toast, modal)
+│   ├── timer.js                ← Pitstop stopwatch logica
+│   └── checklist.js            ← Checklist logica
+└── pages/
+    ├── tracks.html
+    ├── pitstop.html
+    ├── agenda.html
+    └── checklist.html
 ```
 
 ---
 
-## Setup & Run
+## Stap 1 — Supabase account aanmaken
 
-### 1. Install Python dependencies
+1. Ga naar **https://supabase.com** en maak een gratis account
+2. Klik op **"New Project"**
+3. Kies een naam (bijv. `kartpit`) en een wachtwoord
+4. Wacht tot het project klaar is (~1 minuut)
+
+---
+
+## Stap 2 — Database aanmaken
+
+1. Ga in je Supabase project naar **SQL Editor** (linkermenu)
+2. Klik op **"New query"**
+3. Kopieer de inhoud van `supabase_setup.sql` en plak het erin
+4. Klik op **"Run"**
+
+Dit maakt alle tabellen aan én vult ze met standaard data.
+
+---
+
+## Stap 3 — API sleutels kopiëren
+
+1. Ga naar **Project Settings** → **API**
+2. Kopieer de **Project URL** (bijv. `https://abcxyz.supabase.co`)
+3. Kopieer de **anon / public key** (de lange sleutel)
+4. Open `js/supabase.config.js` en vul in:
+
+```javascript
+const SUPABASE_URL = 'https://jouw-project.supabase.co';
+const SUPABASE_KEY = 'jouw-lange-anon-key-hier';
+```
+
+---
+
+## Stap 4 — Openen in browser
+
+Open gewoon `index.html` in je browser — geen server nodig!
+
+> 💡 **Tip:** Gebruik een lokale server voor het beste resultaat:
+> - VS Code: installeer de "Live Server" extensie, rechtsklik op index.html → "Open with Live Server"
+> - Of: `python -m http.server 8000` in de map uitvoeren
+
+---
+
+## Realtime samenwerking
+
+Alle teamleden die de app open hebben zien **direct** wijzigingen van anderen:
+- Checklist item afvinken → iedereen ziet het meteen
+- Pitstop opgeslagen → verschijnt bij iedereen in de history
+- Event aan agenda toevoegen → timeline update voor iedereen
+
+---
+
+## Later omzetten naar mobiele app (Android/iOS)
+
+Omdat alles puur HTML/CSS/JS is zonder server, kun je dit later eenvoudig inpakken met **Capacitor**:
+
 ```bash
-pip install -r requirements.txt
+npm install @capacitor/core @capacitor/cli
+npx cap init
+npx cap add android
+npx cap add ios
+npx cap sync
+npx cap open android   # opent Android Studio
+npx cap open ios       # opent Xcode
 ```
 
-### 2. Start the app
-```bash
-python app.py
-```
-
-### 3. Open in browser
-```
-http://localhost:5000
-```
-
-Data is automatically saved to JSON files in the `data/` folder.
-No database setup required.
+De Supabase verbinding werkt identiek in de mobiele app.
 
 ---
 
-## Keyboard Shortcuts (Pitstop Timer)
-- `Space` — Start / Stop timer
-- `R` — Reset timer
+## Functies overzicht
 
----
-
-## API Endpoints
-
-| Method | Route | Description |
-|--------|-------|-------------|
-| GET | `/api/checklist` | Get all checklist items |
-| PATCH | `/api/checklist/<id>` | Toggle item done/undone |
-| POST | `/api/checklist/add` | Add new item |
-| POST | `/api/checklist/reset` | Reset all to unchecked |
-| GET | `/api/agenda` | Get agenda |
-| POST | `/api/agenda/add` | Add event |
-| DELETE | `/api/agenda/<id>` | Delete event |
-| GET | `/api/pitstops` | Get pitstop history |
-| POST | `/api/pitstops/save` | Save a pitstop |
-| DELETE | `/api/pitstops/<id>` | Delete a pitstop |
-| GET | `/api/tracks` | Get tracks |
-| POST | `/api/tracks/add` | Add a track |
+| Pagina        | Functie                                                    |
+|---------------|------------------------------------------------------------|
+| **Home**      | Live statistieken, agenda preview, snelkoppelingen         |
+| **Tracks**    | Circuits toevoegen/verwijderen met rondtijden en notities  |
+| **Pitstop**   | Stopwatch met doeltijd, stats, team-gedeelde history       |
+| **Agenda**    | Race dag schema, live gesynchroniseerd                     |
+| **Checklist** | Kart + team gereedheid, realtime voor iedereen zichtbaar   |

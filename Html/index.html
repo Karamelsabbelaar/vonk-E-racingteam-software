@@ -1,109 +1,147 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vonk E-Karting Team</title>
-  <link rel="stylesheet" href="style.css">
+  <title>KartPit — Home</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- Hero -->
-  <section class="hero">
-    <div class="hero-grid">
-      <div class="hero-text">
-        <h1>RACE<br><span class="red">READY.</span></h1>
-        <p>Your complete amateur karting race day manager. Track info, pitstop timers, race agenda, and pre-race checklists — all in one paddock tool.</p>
-        <div class="hero-actions">
-          <a href="pitstop.html" class="btn btn-red btn-lg">⏱ Pitstop Timer</a>
-          <a href="checklist.html" class="btn btn-outline btn-lg">☑ Checklist</a>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="kart-icon-big">🏎️</div>
-        <div class="hero-stats">
-          <div class="card card-red">
-            <div class="card-title">Tracks Saved</div>
-            <div class="card-value">{{ tracks|length }}</div>
-          </div>
-          <div class="card card-yellow">
-            <div class="card-title">Pitstops Logged</div>
-            <div class="card-value">{{ pitstops|length }}</div>
-          </div>
-          <div class="card card-green">
-            <div class="card-title">Events Today</div>
-            <div class="card-value">{{ agenda|length }}</div>
-          </div>
-          <div class="card card-blue">
-            <div class="card-title">Status</div>
-            <div class="card-value" style="font-size:22px;padding-top:4px">Race Day 🏁</div>
-          </div>
-        </div>
+<div class="wrapper">
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="nav-logo"><span class="flag">🏁</span>KART<span>PIT</span></a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="pages/tracks.html">Tracks</a>
+        <a href="pages/pitstop.html">Pitstop</a>
+        <a href="pages/agenda.html">Agenda</a>
+        <a href="pages/checklist.html">Checklist</a>
       </div>
     </div>
-  </section>
+  </nav>
 
-  <!-- Quick Nav -->
-  <div class="section-header">
-    <h2 class="section-title">Quick Access</h2>
-  </div>
-  <div class="quicknav-grid">
-    <a href="/tracks" class="quicknav-card">
-      <div class="quicknav-icon">🗺️</div>
-      <div class="quicknav-label">Tracks</div>
-      <div class="quicknav-sub">Circuit info & notes</div>
-    </a>
-    <a href="/pitstop" class="quicknav-card">
-      <div class="quicknav-icon">⏱️</div>
-      <div class="quicknav-label">Pitstop Timer</div>
-      <div class="quicknav-sub">Live stopwatch & history</div>
-    </a>
-    <a href="/agenda" class="quicknav-card">
-      <div class="quicknav-icon">📋</div>
-      <div class="quicknav-label">Race Agenda</div>
-      <div class="quicknav-sub">Schedule & sessions</div>
-    </a>
-    <a href="/checklist" class="quicknav-card">
-      <div class="quicknav-icon">✅</div>
-      <div class="quicknav-label">Checklist</div>
-      <div class="quicknav-sub">Kart & team readiness</div>
-    </a>
-  </div>
+  <main class="page-content">
 
-  <!-- Recent Agenda -->
-  <div class="section-header" style="margin-top:12px">
-    <h2 class="section-title">Today's Schedule</h2>
-    <a href="/agenda" class="btn btn-ghost btn-sm">View all →</a>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden">
-    <table class="data-table">
-      <thead>
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <h1>RACE<br><span class="red">READY.</span></h1>
+          <p>Jullie complete karting race day manager. Tracks, pitstop timers, agenda en pre-race checklist — live gesynchroniseerd voor het hele team.</p>
+          <div class="hero-actions">
+            <a href="pages/pitstop.html" class="btn btn-red btn-lg">⏱ Pitstop Timer</a>
+            <a href="pages/checklist.html" class="btn btn-outline btn-lg">☑ Checklist</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="kart-icon-big">🏎️</div>
+          <div class="hero-stats">
+            <div class="card card-red">
+              <div class="card-title">Tracks</div>
+              <div class="card-value" id="stat-tracks">–</div>
+            </div>
+            <div class="card card-yellow">
+              <div class="card-title">Pitstops</div>
+              <div class="card-value" id="stat-pitstops">–</div>
+            </div>
+            <div class="card card-green">
+              <div class="card-title">Events</div>
+              <div class="card-value" id="stat-events">–</div>
+            </div>
+            <div class="card card-blue">
+              <div class="card-title">Status</div>
+              <div class="card-value" style="font-size:22px;padding-top:4px">Race Day 🏁</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Nav -->
+    <div class="section-header">
+      <h2 class="section-title">Quick Access</h2>
+    </div>
+    <div class="quicknav-grid">
+      <a href="pages/tracks.html" class="quicknav-card">
+        <div class="quicknav-icon">🗺️</div>
+        <div class="quicknav-label">Tracks</div>
+        <div class="quicknav-sub">Circuit info & notities</div>
+      </a>
+      <a href="pages/pitstop.html" class="quicknav-card">
+        <div class="quicknav-icon">⏱️</div>
+        <div class="quicknav-label">Pitstop Timer</div>
+        <div class="quicknav-sub">Live stopwatch & history</div>
+      </a>
+      <a href="pages/agenda.html" class="quicknav-card">
+        <div class="quicknav-icon">📋</div>
+        <div class="quicknav-label">Race Agenda</div>
+        <div class="quicknav-sub">Schema & sessies</div>
+      </a>
+      <a href="pages/checklist.html" class="quicknav-card">
+        <div class="quicknav-icon">✅</div>
+        <div class="quicknav-label">Checklist</div>
+        <div class="quicknav-sub">Kart & team gereedheid</div>
+      </a>
+    </div>
+
+    <!-- Agenda preview -->
+    <div class="section-header" style="margin-top:12px">
+      <h2 class="section-title">Vandaag</h2>
+      <a href="pages/agenda.html" class="btn btn-ghost btn-sm">Alles zien →</a>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="data-table">
+        <thead><tr><th>Tijd</th><th>Event</th><th>Type</th></tr></thead>
+        <tbody id="agenda-preview">
+          <tr><td colspan="3" style="color:var(--text3);text-align:center;padding:24px">Laden…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+
+  <footer class="footer">KartPit &mdash; Amateur Karting Race Manager &mdash; 🏎️</footer>
+</div>
+
+<div id="toast-container"></div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.config.js"></script>
+<script src="js/main.js"></script>
+<script>
+  const TYPE_BADGE = {
+    race: 'badge-red', qualifying: 'badge-yellow',
+    session: 'badge-blue', pitstop: 'badge-green'
+  };
+
+  async function loadHome() {
+    try {
+      const [tracks, pitstops, agenda] = await Promise.all([
+        Tracks.getAll(), Pitstops.getAll(), Agenda.getAll()
+      ]);
+      document.getElementById('stat-tracks').textContent   = tracks.length;
+      document.getElementById('stat-pitstops').textContent = pitstops.length;
+      document.getElementById('stat-events').textContent   = agenda.length;
+
+      const tbody = document.getElementById('agenda-preview');
+      if (!agenda.length) {
+        tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text3);text-align:center;padding:24px">Geen events</td></tr>';
+        return;
+      }
+      tbody.innerHTML = agenda.slice(0, 5).map(item => `
         <tr>
-          <th>Time</th>
-          <th>Event</th>
-          <th>Type</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in agenda[:5] %}
-        <tr>
-          <td style="font-family:var(--font-display);font-size:18px;color:var(--text2)">{{ item.time }}</td>
-          <td>{{ item.event }}</td>
-          <td>
-            <span class="badge
-              {% if item.type == 'race' %}badge-red
-              {% elif item.type == 'qualifying' %}badge-yellow
-              {% elif item.type == 'session' %}badge-blue
-              {% elif item.type == 'pitstop' %}badge-green
-              {% else %}badge-gray{% endif %}
-            ">{{ item.type }}</span>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+          <td style="font-family:var(--font-display);font-size:18px;color:var(--text2)">${item.time}</td>
+          <td>${item.event}</td>
+          <td><span class="badge ${TYPE_BADGE[item.type] || 'badge-gray'}">${item.type}</span></td>
+        </tr>`).join('');
+    } catch(e) {
+      Toast.show('Verbindingsfout: controleer je Supabase instellingen', 'error', 6000);
+    }
+  }
 
-  {% endblock %}
-
+  document.addEventListener('DOMContentLoaded', loadHome);
+</script>
 </body>
 </html>

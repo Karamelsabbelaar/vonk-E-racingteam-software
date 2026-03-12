@@ -1,114 +1,162 @@
-{% extends "base.html" %}
-{% block title %}KartPit — Tracks{% endblock %}
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartPit — Tracks</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="wrapper">
 
-{% block content %}
-<div class="page-header">
-  <div class="eyebrow">Circuit Database</div>
-  <h1>TRACKS</h1>
-  <p class="subtitle">Karting circuits with layout notes and lap benchmarks</p>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="nav-logo"><span class="flag">🏁</span>KART<span>PIT</span></a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="tracks.html">Tracks</a>
+        <a href="pitstop.html">Pitstop</a>
+        <a href="agenda.html">Agenda</a>
+        <a href="checklist.html">Checklist</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-content">
+
+    <div class="page-header">
+      <div class="eyebrow">Circuit Database</div>
+      <h1>TRACKS</h1>
+      <p class="subtitle">Kartcircuits met layout notities en rondtijden</p>
+    </div>
+
+    <!-- Track toevoegen -->
+    <div class="card" style="margin-bottom:40px">
+      <h3 class="section-title" style="margin-bottom:16px">Track Toevoegen</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Naam</label>
+          <input type="text" id="tr-name" placeholder="bijv. Raceland Lelystad" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Locatie</label>
+          <input type="text" id="tr-loc" placeholder="Stad, Land" />
+        </div>
+        <div class="form-group" style="max-width:130px">
+          <label class="form-label">Lengte (m)</label>
+          <input type="number" id="tr-len" placeholder="950" />
+        </div>
+        <div class="form-group" style="max-width:100px">
+          <label class="form-label">Bochten</label>
+          <input type="number" id="tr-turns" placeholder="12" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="max-width:140px">
+          <label class="form-label">Beste Ronde</label>
+          <input type="text" id="tr-lap" placeholder="bijv. 47.2s" />
+        </div>
+        <div class="form-group" style="max-width:160px">
+          <label class="form-label">Type</label>
+          <select id="tr-type">
+            <option value="outdoor">Buiten</option>
+            <option value="indoor">Binnen</option>
+            <option value="indoor/outdoor">Binnen/Buiten</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notities</label>
+          <input type="text" id="tr-notes" placeholder="Bochtentips, ondergrond…" />
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button onclick="addTrack()" class="btn btn-red">+ Toevoegen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="tracks-grid" id="tracks-grid">
+      <p style="color:var(--text3)">Laden…</p>
+    </div>
+
+  </main>
+
+  <footer class="footer">KartPit &mdash; Amateur Karting Race Manager &mdash; 🏎️</footer>
 </div>
 
-<!-- Add Track -->
-<div class="card" style="margin-bottom:40px">
-  <h3 class="section-title" style="margin-bottom:16px">Add Track</h3>
-  <div class="form-row">
-    <div class="form-group">
-      <label class="form-label">Track Name</label>
-      <input type="text" id="tr-name" placeholder="e.g. Rye House Kart Circuit" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Location</label>
-      <input type="text" id="tr-loc" placeholder="City, Country" />
-    </div>
-    <div class="form-group" style="max-width:130px">
-      <label class="form-label">Length (m)</label>
-      <input type="number" id="tr-len" placeholder="950" />
-    </div>
-    <div class="form-group" style="max-width:100px">
-      <label class="form-label">Turns</label>
-      <input type="number" id="tr-turns" placeholder="12" />
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-group" style="max-width:140px">
-      <label class="form-label">Best Lap</label>
-      <input type="text" id="tr-lap" placeholder="e.g. 47.2s" />
-    </div>
-    <div class="form-group" style="max-width:160px">
-      <label class="form-label">Type</label>
-      <select id="tr-type">
-        <option value="outdoor">Outdoor</option>
-        <option value="indoor">Indoor</option>
-        <option value="indoor/outdoor">Indoor/Outdoor</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Notes</label>
-      <input type="text" id="tr-notes" placeholder="Corner tips, surface notes…" />
-    </div>
-    <div style="display:flex;align-items:flex-end">
-      <button onclick="addTrack()" class="btn btn-red">+ Add</button>
-    </div>
-  </div>
-</div>
+<div id="toast-container"></div>
 
-<!-- Tracks Grid -->
-<div class="tracks-grid" id="tracks-grid">
-  {% for t in tracks %}
-  <div class="track-card">
-    <div class="track-header">
-      <div>
-        <div class="track-name">{{ t.name }}</div>
-        <div style="font-size:13px;color:var(--text3);margin-top:2px">📍 {{ t.location }}</div>
-      </div>
-      <span class="badge
-        {% if t.type == 'indoor' %}badge-blue
-        {% elif t.type == 'outdoor' %}badge-green
-        {% else %}badge-yellow{% endif %}
-      ">{{ t.type }}</span>
-    </div>
-    <div class="track-body">
-      <div class="track-stat">
-        <span class="track-stat-label">Length</span>
-        <span class="track-stat-value">{{ t.length_m }}m</span>
-      </div>
-      <div class="track-stat">
-        <span class="track-stat-label">Turns</span>
-        <span class="track-stat-value">{{ t.turns }}</span>
-      </div>
-      <div class="track-stat">
-        <span class="track-stat-label">Best Lap</span>
-        <span class="track-stat-value" style="color:var(--yellow)">{{ t.best_lap }}</span>
-      </div>
-      {% if t.notes %}
-      <div class="track-notes">💡 {{ t.notes }}</div>
-      {% endif %}
-    </div>
-  </div>
-  {% endfor %}
-</div>
-{% endblock %}
-
-{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.config.js"></script>
+<script src="../js/main.js"></script>
 <script>
-async function addTrack() {
-  const get = id => document.getElementById(id).value;
-  const name = get('tr-name').trim();
-  if (!name) { Toast.show('Track name required', 'error'); return; }
-  const payload = {
-    name,
-    location: get('tr-loc'),
-    length_m: parseInt(get('tr-len')) || 0,
-    turns:    parseInt(get('tr-turns')) || 0,
-    best_lap: get('tr-lap') || '–',
-    type:     get('tr-type'),
-    notes:    get('tr-notes')
-  };
-  const res = await API.post('/api/tracks/add', payload);
-  if (res.ok) {
-    Toast.show('Track added', 'success');
-    setTimeout(() => location.reload(), 800);
+  const TYPE_BADGE = { indoor: 'badge-blue', outdoor: 'badge-green' };
+
+  async function renderTracks() {
+    const grid = document.getElementById('tracks-grid');
+    try {
+      const data = await Tracks.getAll();
+      if (!data.length) {
+        grid.innerHTML = '<p style="color:var(--text3)">Nog geen tracks — voeg er een toe.</p>';
+        return;
+      }
+      grid.innerHTML = data.map(t => `
+        <div class="track-card">
+          <div class="track-header">
+            <div>
+              <div class="track-name">${t.name}</div>
+              <div style="font-size:13px;color:var(--text3);margin-top:2px">📍 ${t.location}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+              <span class="badge ${TYPE_BADGE[t.type] || 'badge-yellow'}">${t.type}</span>
+              <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.4">✕</button>
+            </div>
+          </div>
+          <div class="track-body">
+            <div class="track-stat"><span class="track-stat-label">Lengte</span><span class="track-stat-value">${t.length_m}m</span></div>
+            <div class="track-stat"><span class="track-stat-label">Bochten</span><span class="track-stat-value">${t.turns}</span></div>
+            <div class="track-stat"><span class="track-stat-label">Beste Ronde</span><span class="track-stat-value" style="color:var(--yellow)">${t.best_lap}</span></div>
+            ${t.notes ? `<div class="track-notes">💡 ${t.notes}</div>` : ''}
+          </div>
+        </div>`).join('');
+    } catch(e) {
+      grid.innerHTML = `<p style="color:var(--red)">Fout: ${e.message}</p>`;
+    }
   }
-}
+
+  async function addTrack() {
+    const get = id => document.getElementById(id).value;
+    const name = get('tr-name').trim();
+    if (!name) { Toast.show('Tracknaam is verplicht', 'error'); return; }
+    try {
+      await Tracks.add({
+        name,
+        location: get('tr-loc'),
+        length_m: parseInt(get('tr-len')) || 0,
+        turns:    parseInt(get('tr-turns')) || 0,
+        best_lap: get('tr-lap') || '–',
+        type:     get('tr-type'),
+        notes:    get('tr-notes')
+      });
+      ['tr-name','tr-loc','tr-len','tr-turns','tr-lap','tr-notes'].forEach(id => document.getElementById(id).value = '');
+      Toast.show('Track toegevoegd', 'success');
+      renderTracks();
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
+  }
+
+  async function deleteTrack(id) {
+    if (!confirm('Track verwijderen?')) return;
+    try {
+      await Tracks.remove(id);
+      Toast.show('Track verwijderd', 'success');
+      renderTracks();
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', renderTracks);
 </script>
-{% endblock %}
+</body>
+</html>

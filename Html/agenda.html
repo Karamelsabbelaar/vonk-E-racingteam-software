@@ -1,98 +1,150 @@
-{% extends "base.html" %}
-{% block title %}KartPit — Race Agenda{% endblock %}
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartPit — Agenda</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+<div class="wrapper">
 
-{% block content %}
-<div class="page-header">
-  <div class="eyebrow">Race Day</div>
-  <h1>RACE AGENDA</h1>
-  <p class="subtitle">Today's full schedule — sessions, briefings, races</p>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="../index.html" class="nav-logo"><span class="flag">🏁</span>KART<span>PIT</span></a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="tracks.html">Tracks</a>
+        <a href="pitstop.html">Pitstop</a>
+        <a href="agenda.html">Agenda</a>
+        <a href="checklist.html">Checklist</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-content">
+
+    <div class="page-header">
+      <div class="eyebrow">Race Day</div>
+      <h1>RACE AGENDA</h1>
+      <p class="subtitle">Het volledige schema — live zichtbaar voor het hele team</p>
+    </div>
+
+    <!-- Event toevoegen -->
+    <div class="card" style="margin-bottom:40px">
+      <h3 class="section-title" style="margin-bottom:16px">Event Toevoegen</h3>
+      <div class="form-row">
+        <div class="form-group" style="max-width:120px">
+          <label class="form-label">Tijd</label>
+          <input type="time" id="ev-time" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Omschrijving</label>
+          <input type="text" id="ev-desc" placeholder="bijv. Vrije training 15 min" />
+        </div>
+        <div class="form-group" style="max-width:180px">
+          <label class="form-label">Type</label>
+          <select id="ev-type">
+            <option value="admin">Admin</option>
+            <option value="briefing">Briefing</option>
+            <option value="session">Training</option>
+            <option value="qualifying">Kwalificatie</option>
+            <option value="race">Race</option>
+            <option value="pitstop">Pitstop oefening</option>
+            <option value="break">Pauze</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button onclick="addEvent()" class="btn btn-red">+ Toevoegen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title">Schema</h2>
+      <span id="live-badge" class="badge badge-green" style="animation:pulse 2s infinite">● LIVE</span>
+    </div>
+
+    <div class="agenda-list" id="agenda-list">
+      <p style="color:var(--text3);text-align:center;padding:40px 0">Laden…</p>
+    </div>
+
+  </main>
+
+  <footer class="footer">KartPit &mdash; Amateur Karting Race Manager &mdash; 🏎️</footer>
 </div>
 
-<!-- Add Event -->
-<div class="card" style="margin-bottom:40px">
-  <h3 class="section-title" style="margin-bottom:16px">Add Event</h3>
-  <div class="form-row">
-    <div class="form-group" style="max-width:120px">
-      <label class="form-label">Time</label>
-      <input type="time" id="ev-time" />
-    </div>
-    <div class="form-group">
-      <label class="form-label">Event Description</label>
-      <input type="text" id="ev-desc" placeholder="e.g. Free practice 30 min" />
-    </div>
-    <div class="form-group" style="max-width:180px">
-      <label class="form-label">Type</label>
-      <select id="ev-type">
-        <option value="admin">Admin</option>
-        <option value="briefing">Briefing</option>
-        <option value="session">Practice Session</option>
-        <option value="qualifying">Qualifying</option>
-        <option value="race">Race</option>
-        <option value="pitstop">Pitstop Practice</option>
-        <option value="break">Break</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:flex-end">
-      <button onclick="addEvent()" class="btn btn-red">+ Add</button>
-    </div>
-  </div>
-</div>
+<div id="toast-container"></div>
 
-<!-- Timeline -->
-<div class="section-header">
-  <h2 class="section-title">Schedule</h2>
-</div>
-
-<div class="agenda-list" id="agenda-list">
-  {% for item in agenda %}
-  <div class="agenda-row" data-id="{{ item.id }}">
-    <div class="agenda-time-col">
-      <div class="agenda-time">{{ item.time }}</div>
-    </div>
-    <div class="agenda-dot-col">
-      <div class="agenda-dot" style="
-        {% if item.type == 'race' %}background:var(--red)
-        {% elif item.type == 'qualifying' %}background:var(--yellow)
-        {% elif item.type == 'session' %}background:var(--blue)
-        {% elif item.type == 'pitstop' %}background:var(--green)
-        {% else %}background:var(--text3){% endif %}
-      "></div>
-      {% if not loop.last %}<div class="agenda-line"></div>{% endif %}
-    </div>
-    <div class="agenda-content">
-      <div class="agenda-event">{{ item.event }}</div>
-      <span class="badge
-        {% if item.type == 'race' %}badge-red
-        {% elif item.type == 'qualifying' %}badge-yellow
-        {% elif item.type == 'session' %}badge-blue
-        {% elif item.type == 'pitstop' %}badge-green
-        {% else %}badge-gray{% endif %}
-      ">{{ item.type }}</span>
-      <button onclick="deleteEvent({{ item.id }})" class="btn btn-ghost btn-sm" style="margin-left:8px;opacity:0.5">✕</button>
-    </div>
-  </div>
-  {% endfor %}
-</div>
-{% endblock %}
-
-{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../js/supabase.config.js"></script>
+<script src="../js/main.js"></script>
 <script>
-async function addEvent() {
-  const time = document.getElementById('ev-time').value;
-  const desc = document.getElementById('ev-desc').value.trim();
-  const type = document.getElementById('ev-type').value;
-  if (!time || !desc) { Toast.show('Fill in time and description', 'error'); return; }
-  const res = await API.post('/api/agenda/add', { time, event: desc, type });
-  if (res.ok) { Toast.show('Event added', 'success'); setTimeout(() => location.reload(), 800); }
-}
+  const TYPE_COLORS = {
+    race:       { dot: 'var(--red)',    badge: 'badge-red'    },
+    qualifying: { dot: 'var(--yellow)', badge: 'badge-yellow' },
+    session:    { dot: 'var(--blue)',   badge: 'badge-blue'   },
+    pitstop:    { dot: 'var(--green)',  badge: 'badge-green'  },
+  };
 
-async function deleteEvent(id) {
-  const res = await API.delete(`/api/agenda/${id}`);
-  if (res.ok) {
-    const el = document.querySelector(`[data-id="${id}"]`);
-    if (el) el.remove();
-    Toast.show('Event removed', 'success');
+  async function renderAgenda() {
+    const list = document.getElementById('agenda-list');
+    try {
+      const data = await Agenda.getAll();
+      if (!data.length) {
+        list.innerHTML = '<p style="color:var(--text3);text-align:center;padding:40px 0">Nog geen events — voeg er een toe.</p>';
+        return;
+      }
+      list.innerHTML = data.map((item, i) => {
+        const c = TYPE_COLORS[item.type] || { dot: 'var(--text3)', badge: 'badge-gray' };
+        return `
+          <div class="agenda-row" data-id="${item.id}">
+            <div class="agenda-time-col"><div class="agenda-time">${item.time}</div></div>
+            <div class="agenda-dot-col">
+              <div class="agenda-dot" style="background:${c.dot}"></div>
+              ${i < data.length - 1 ? '<div class="agenda-line"></div>' : ''}
+            </div>
+            <div class="agenda-content">
+              <div class="agenda-event">${item.event}</div>
+              <span class="badge ${c.badge}">${item.type}</span>
+              <button onclick="deleteEvent(${item.id})" class="btn btn-ghost btn-sm" style="margin-left:8px;opacity:0.4">✕</button>
+            </div>
+          </div>`;
+      }).join('');
+    } catch(e) {
+      list.innerHTML = `<p style="color:var(--red)">Fout: ${e.message}</p>`;
+    }
   }
-}
+
+  async function addEvent() {
+    const time = document.getElementById('ev-time').value;
+    const desc = document.getElementById('ev-desc').value.trim();
+    const type = document.getElementById('ev-type').value;
+    if (!time || !desc) { Toast.show('Vul tijd en omschrijving in', 'error'); return; }
+    try {
+      await Agenda.add(time, desc, type);
+      document.getElementById('ev-time').value = '';
+      document.getElementById('ev-desc').value = '';
+      Toast.show('Event toegevoegd', 'success');
+      // Realtime doet de re-render automatisch
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
+  }
+
+  async function deleteEvent(id) {
+    try {
+      await Agenda.remove(id);
+      Toast.show('Event verwijderd', 'success');
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderAgenda();
+    Realtime.onAgendaChange(() => renderAgenda());
+  });
 </script>
-{% endblock %}
+</body>
+</html>
