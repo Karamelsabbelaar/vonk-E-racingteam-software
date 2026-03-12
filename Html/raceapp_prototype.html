@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RaceApp Prototype</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .header {
+            background-color: #ff6b35;
+            color: white;
+            padding: 15px;
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .checklist {
+            list-style-type: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .checklist li:last-child {
+            border-bottom: none;
+        }
+        .map {
+            height: 200px;
+            background-color: #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+        }
+        .faq-item {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+        }
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+        button {
+            background-color: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RaceApp</h1>
+        </div>
+
+        <div class="section">
+            <h2>Wedstrijd Checklist</h2>
+            <ul class="checklist">
+                <li><input type="checkbox" id="task1" name="task1">
+                <label for="task1">Kruis vink, niet verder kunnen klikken</label></li>
+                <li><input type="checkbox" id="task2" name="task2">
+                <label for="task2">Goed overzicht, taken en verantwoordelijke lijst</label></li>
+                <li><input type="checkbox" id="task3" name="task3">
+                <label for="task3">Bijv. baandmarhall, hoofdmonteur</label></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Circuit</h2>
+            <div class="map">
+                <p>Kaart van het circuit</p>
+            </div>
+            <p>Keuringen, elke racedag moet het kart voldoen aan een aantal eisen...</p>
+        </div>
+
+        <div class="section">
+            <h2>Weer en Temperatuur</h2>
+            <p>Temperatuur was het...</p>
+        </div>
+
+        <div class="section">
+            <h2>FAQ</h2>
+            <div class="faq-item">
+                <h3>Handeling: als er iets misgaat, wie doet wat?</h3>
+                <p>Bij eventuele problemen kan erbij gepakt worden...</p>
+            </div>
+            <div class="faq-item">
+                <h3>Agenda erin, datum race dag etc.</h3>
+                <p>Zodat iedereen kan zien wanneer wedstrijd is.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Visueel</h2>
+            <p>Logo, kopjes van circuits, teamstatistieken, zwarte baan afbeelding...</p>
+        </div>
+
+        <button>Opslaan</button>
+    </div>
+</body>
+</html>

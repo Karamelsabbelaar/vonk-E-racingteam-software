@@ -4,20 +4,13 @@
  */
 
 async function toggleItem(id) {
-  try {
-    const res = await API.patch(`/api/checklist/${id}`);
-    if (res.ok) {
-      const el = document.querySelector(`[data-id="${id}"]`);
-      if (el) {
-        el.classList.toggle('done', res.done);
-      }
-      updateAllProgress();
-    } else {
-      Toast.show('Failed to update item', 'error');
+  const res = await API.patch(`/api/checklist/${id}`);
+  if (res.ok) {
+    const el = document.querySelector(`[data-id="${id}"]`);
+    if (el) {
+      el.classList.toggle('done', res.done);
     }
-  } catch (err) {
-    console.error('Toggle failed:', err);
-    Toast.show('Network error', 'error');
+    updateAllProgress();
   }
 }
 
@@ -42,44 +35,30 @@ function updateAllProgress() {
 }
 
 async function addItem() {
-  try {
-    const input = document.getElementById('new-item-text');
-    const cat   = document.getElementById('new-item-cat');
-    if (!input.value.trim()) { Toast.show('Enter an item first', 'error'); return; }
-    if (!cat.value) { Toast.show('Select a category', 'error'); return; }
+  const input = document.getElementById('new-item-text');
+  const cat   = document.getElementById('new-item-cat');
+  if (!input.value.trim()) { Toast.show('Enter an item first', 'error'); return; }
 
-    const res = await API.post('/api/checklist/add', {
-      item: input.value.trim(),
-      category: cat.value
-    });
+  const res = await API.post('/api/checklist/add', {
+    item: input.value.trim(),
+    category: cat.value
+  });
 
-    if (res.ok) {
-      Toast.show('Item added — refresh to see it', 'success');
-      input.value = '';
-      location.reload();
-    } else {
-      Toast.show('Failed to add item', 'error');
-    }
-  } catch (err) {
-    console.error('Add item failed:', err);
-    Toast.show('Network error', 'error');
+  if (res.ok) {
+    Toast.show('Item added — refresh to see it', 'success');
+    input.value = '';
+    // Optionally do a soft reload
+    location.reload();
   }
 }
 
 async function resetChecklist() {
   if (!confirm('Reset all items to unchecked?')) return;
-  try {
-    const res = await API.post('/api/checklist/reset', {});
-    if (res.ok) {
-      document.querySelectorAll('.checklist-item').forEach(el => el.classList.remove('done'));
-      updateAllProgress();
-      Toast.show('Checklist reset', 'success');
-    } else {
-      Toast.show('Failed to reset checklist', 'error');
-    }
-  } catch (err) {
-    console.error('Reset failed:', err);
-    Toast.show('Network error', 'error');
+  const res = await API.post('/api/checklist/reset', {});
+  if (res.ok) {
+    document.querySelectorAll('.checklist-item').forEach(el => el.classList.remove('done'));
+    updateAllProgress();
+    Toast.show('Checklist reset', 'success');
   }
 }
 

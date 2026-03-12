@@ -70,47 +70,35 @@ const PitTimer = (() => {
   }
 
   async function saveStop() {
-    try {
-      const labelIn = document.getElementById('stop-label');
-      const notesIn = document.getElementById('stop-notes');
-      const label   = labelIn ? labelIn.value.trim() || 'Pitstop' : 'Pitstop';
-      const notes   = notesIn ? notesIn.value.trim() : '';
+    const labelIn = document.getElementById('stop-label');
+    const notesIn = document.getElementById('stop-notes');
+    const label   = labelIn ? labelIn.value.trim() || 'Pitstop' : 'Pitstop';
+    const notes   = notesIn ? notesIn.value.trim() : '';
 
-      const payload = {
-        duration: elapsed,
-        label,
-        notes
-      };
+    const payload = {
+      duration: elapsed,
+      label,
+      notes
+    };
 
-      const res = await API.post('/api/pitstops/save', payload);
-      if (res.ok) {
-        Toast.show(`✓ Saved: ${(elapsed/1000).toFixed(2)}s`, 'success');
-        Modal.close('save-modal');
-        await loadHistory();
-        if (labelIn) labelIn.value = '';
-        if (notesIn) notesIn.value = '';
-        reset();
-      } else {
-        Toast.show('Save failed', 'error');
-      }
-    } catch (err) {
-      console.error('Save failed:', err);
-      Toast.show('Network error - stop not saved', 'error');
+    const res = await API.post('/api/pitstops/save', payload);
+    if (res.ok) {
+      Toast.show(`✓ Saved: ${(elapsed/1000).toFixed(2)}s`, 'success');
+      Modal.close('save-modal');
+      await loadHistory();
+      if (labelIn) labelIn.value = '';
+      if (notesIn) notesIn.value = '';
+      reset();
+    } else {
+      Toast.show('Save failed', 'error');
     }
   }
 
   async function deleteStop(id) {
-    try {
-      const res = await API.delete(`/api/pitstops/${id}`);
-      if (res.ok) {
-        Toast.show('Stop removed', 'success');
-        await loadHistory();
-      } else {
-        Toast.show('Failed to remove stop', 'error');
-      }
-    } catch (err) {
-      console.error('Delete failed:', err);
-      Toast.show('Network error', 'error');
+    const res = await API.delete(`/api/pitstops/${id}`);
+    if (res.ok) {
+      Toast.show('Stop removed', 'success');
+      await loadHistory();
     }
   }
 
@@ -139,37 +127,26 @@ const PitTimer = (() => {
 
   async function loadHistory() {
     if (!histList) return;
-    try {
-      const data = await API.get('/api/pitstops');
-      if (!data || !data.length) {
-        histList.innerHTML = '<p style="color:var(--text3);text-align:center;padding:32px 0">No stops recorded yet</p>';
-        const el = id => document.getElementById(id);
-        if (el('stat-best'))  el('stat-best').textContent  = '–';
-        if (el('stat-avg'))   el('stat-avg').textContent   = '–';
-        if (el('stat-worst')) el('stat-worst').textContent = '–';
-        if (el('stat-count')) el('stat-count').textContent = '0';
-        return;
-      }
-      // Sort newest first
-      const sorted = [...data].sort((a,b) => b.id - a.id);
-      histList.innerHTML = sorted.map(stopRow).join('');
-
-      // Stats
-      const times = data.map(d => d.duration);
-      const best  = Math.min(...times);
-      const avg   = times.reduce((a,b) => a+b, 0) / times.length;
-      const worst = Math.max(...times);
-
-      const el = id => document.getElementById(id);
-      if (el('stat-best'))  el('stat-best').textContent  = (best/1000).toFixed(2) + 's';
-      if (el('stat-avg'))   el('stat-avg').textContent   = (avg/1000).toFixed(2)  + 's';
-      if (el('stat-worst')) el('stat-worst').textContent = (worst/1000).toFixed(2)+ 's';
-      if (el('stat-count')) el('stat-count').textContent = data.length;
-    } catch (err) {
-      console.error('Failed to load history:', err);
-      Toast.show('Failed to load stops', 'error');
-      if (histList) histList.innerHTML = '<p style="color:var(--text3);text-align:center;padding:32px 0">Error loading stops</p>';
+    const data = await API.get('/api/pitstops');
+    if (!data.length) {
+      histList.innerHTML = '<p style="color:var(--text3);text-align:center;padding:32px 0">No stops recorded yet</p>';
+      return;
     }
+    // Sort newest first
+    const sorted = [...data].sort((a,b) => b.id - a.id);
+    histList.innerHTML = sorted.map(stopRow).join('');
+
+    // Stats
+    const times = data.map(d => d.duration);
+    const best  = Math.min(...times);
+    const avg   = times.reduce((a,b) => a+b, 0) / times.length;
+    const worst = Math.max(...times);
+
+    const el = id => document.getElementById(id);
+    if (el('stat-best'))  el('stat-best').textContent  = (best/1000).toFixed(2) + 's';
+    if (el('stat-avg'))   el('stat-avg').textContent   = (avg/1000).toFixed(2)  + 's';
+    if (el('stat-worst')) el('stat-worst').textContent = (worst/1000).toFixed(2)+ 's';
+    if (el('stat-count')) el('stat-count').textContent = data.length;
   }
 
   // Public API
