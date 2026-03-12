@@ -9,8 +9,8 @@
  */
 
 // ── Supabase verbinding ────────────────────────────────────────
-const SUPABASE_URL  = 'JOUW_SUPABASE_URL_HIER';   // bijv. https://xyzxyz.supabase.co
-const SUPABASE_KEY  = 'JOUW_SUPABASE_ANON_KEY_HIER'; // de lange publieke sleutel
+const SUPABASE_URL  = 'https://tzzuxemddkgvgipsaadr.supabase.co';   // bijv. https://xyzxyz.supabase.co
+const SUPABASE_KEY  = 'sb_publishable_hV5vJlRZn0MOwQFErJPbww_9605nepF'; // de lange publieke sleutel
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
