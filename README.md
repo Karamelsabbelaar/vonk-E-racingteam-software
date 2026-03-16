@@ -1,6 +1,6 @@
 # 🏁 KartPit - Setup Handleiding
 
-[🇳🇱 Nederlands](README.md) | [🇬🇧 English](README_EN.md)
+[🇬🇧 English](README_EN.md)
 
 ---
 
