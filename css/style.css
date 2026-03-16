@@ -260,6 +260,15 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
 }
 .btn-ghost:hover { color: var(--red); }
 
+#btn-reset {
+  border-color: var(--border2);
+  color: var(--text2);
+}
+#btn-reset:hover {
+  border-color: var(--red);
+  color: var(--text);
+}
+
 .btn-sm { padding: 6px 14px; font-size: 11px; }
 .btn-lg { padding: 14px 28px; font-size: 15px; }
 
