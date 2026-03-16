@@ -1,0 +1,16 @@
+{
+  "appId": "com.vonkracing.kartpit",
+  "appName": "KartPit",
+  "webDir": "html",
+  "bundledWebRuntime": false,
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_notification",
+      "iconColor": "#F8AB21"
+    }
+  },
+  "server": {
+    "url": "http://localhost:5000",
+    "cleartext": true
+  }
+}
