@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KartPit — Accountbeheer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#ffffff; --bg2:#ececec; --bg3:#ebebeb; --card:#f8f8f8;
+      --border:#2a2a3a; --border2:#3a3a50;
+      --red:#F8AB21; --red-dim:#ca8c19; --red-glow:#8b6112;
+      --yellow:#ffd700; --yellow-dim:#a08800;
+      --green:#00c853; --green-dim:#005c27;
+      --blue:#0090d4;
+      --text:#E50075; --text2:#9090aa; --text3:#5a5a70;
+      --font-display:'Bebas Neue',sans-serif;
+      --font-ui:'Barlow Condensed',sans-serif;
+      --font-body:'Barlow',sans-serif;
+      --radius:4px; --radius-lg:8px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column;}
+    a{color:inherit;text-decoration:none;}
+    button{cursor:pointer;font-family:var(--font-ui);}
+    input,select{font-family:var(--font-body);background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;outline:none;transition:border .2s;}
+    input:focus,select:focus{border-color:var(--red);}
+    ::-webkit-scrollbar{width:6px;}
+    ::-webkit-scrollbar-track{background:var(--bg);}
+    ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+    ::-webkit-scrollbar-thumb:hover{background:var(--red-dim);}
+
+    /* Navbar */
+    .navbar{background:var(--bg2);border-bottom:2px solid var(--red);position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(248,171,33,.15);}
+    .navbar-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;}
+    .nav-logo{font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--red);display:flex;align-items:center;gap:10px;}
+    .nav-logo span{color:var(--text);}
+    .nav-right{display:flex;align-items:center;gap:12px;}
+    .nav-user{font-family:var(--font-ui);font-size:13px;letter-spacing:1px;color:var(--text2);}
+    .nav-user strong{color:var(--text);}
+
+    /* Buttons */
+    .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-ui);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:10px 20px;border-radius:var(--radius);border:1px solid transparent;transition:all .2s;cursor:pointer;}
+    .btn-red{background:var(--red);color:#fff;border-color:var(--red);}
+    .btn-red:hover{background:var(--red-dim);box-shadow:0 0 20px var(--red-glow);}
+    .btn-red:disabled{opacity:.5;cursor:not-allowed;}
+    .btn-outline{background:transparent;color:var(--text2);border-color:var(--border2);}
+    .btn-outline:hover{border-color:var(--red);color:var(--text);}
+    .btn-ghost{background:transparent;color:var(--text3);border-color:transparent;padding:6px 12px;}
+    .btn-ghost:hover{color:var(--red);}
+    .btn-sm{padding:6px 14px;font-size:11px;}
+    .btn-danger{background:transparent;color:#ff4d6a;border-color:rgba(255,77,106,.3);}
+    .btn-danger:hover{background:rgba(255,77,106,.1);border-color:#ff4d6a;}
+
+    /* Layout */
+    .wrapper{display:flex;flex-direction:column;min-height:100vh;}
+    .page-content{flex:1;max-width:1200px;margin:0 auto;padding:0 24px 60px;width:100%;}
+
+    /* Page header */
+    .page-header{padding:48px 0 32px;border-bottom:1px solid var(--border);margin-bottom:40px;}
+    .page-header .eyebrow{font-family:var(--font-ui);font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:8px;}
+    .page-header h1{font-family:var(--font-display);font-size:56px;letter-spacing:2px;line-height:1;color:var(--text);}
+    .page-header .subtitle{color:var(--text2);margin-top:8px;font-size:15px;}
+
+    /* Section */
+    .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .section-title{font-family:var(--font-ui);font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text);display:flex;align-items:center;gap:10px;}
+    .section-title::before{content:'';display:block;width:3px;height:18px;background:var(--red);border-radius:2px;}
+
+    /* Stats */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:40px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;transition:border-color .2s;}
+    .card-red{border-left:3px solid var(--red);}
+    .card-green{border-left:3px solid var(--green);}
+    .card-blue{border-left:3px solid var(--blue);}
+    .card-title{font-family:var(--font-ui);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+    .card-value{font-family:var(--font-display);font-size:42px;line-height:1;color:var(--text);}
+
+    /* Create account form */
+    .create-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:40px;}
+    .form-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+    .form-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:160px;}
+    .form-label{font-family:var(--font-ui);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);}
+    .form-input{width:100%;font-family:var(--font-body);background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s;}
+    .form-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(248,171,33,.12);}
+    .form-select{width:100%;font-family:var(--font-ui);background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:14px;outline:none;letter-spacing:.5px;transition:border-color .2s;}
+    .form-select:focus{border-color:var(--red);}
+    .form-error{font-family:var(--font-ui);font-size:12px;color:#ff4d6a;margin-top:4px;display:none;}
+    .form-error.visible{display:block;}
+
+    /* Alert */
+    .alert{display:none;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--radius);margin-bottom:20px;font-family:var(--font-ui);font-size:13px;letter-spacing:.5px;}
+    .alert.visible{display:flex;animation:slideIn .25s ease;}
+    .alert.error{background:rgba(229,0,117,.08);border-left:3px solid #E50075;color:var(--text);}
+    .alert.success{background:rgba(0,200,83,.08);border-left:3px solid var(--green);color:#1a6633;}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+
+    /* Table */
+    .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+    .data-table{width:100%;border-collapse:collapse;}
+    .data-table th{font-family:var(--font-ui);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:12px 20px;text-align:left;border-bottom:1px solid var(--border);background:var(--bg2);}
+    .data-table td{padding:14px 20px;border-bottom:1px solid rgba(42,42,58,.5);vertical-align:middle;font-size:14px;}
+    .data-table tr:last-child td{border-bottom:none;}
+    .data-table tr:hover td{background:rgba(248,171,33,.03);}
+    .data-table .empty-row td{text-align:center;color:var(--text3);font-family:var(--font-ui);letter-spacing:1px;padding:40px;}
+
+    /* Badge */
+    .badge{display:inline-block;font-family:var(--font-ui);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:2px;}
+    .badge-red{background:var(--red-dim);color:#ffe0a0;}
+    .badge-gray{background:var(--border);color:var(--text2);}
+    .badge-green{background:var(--green-dim);color:var(--green);}
+
+    /* Divider */
+    .divider{border:none;border-top:1px solid var(--border);margin:24px 0;}
+
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity .2s;}
+    .modal-overlay.open{opacity:1;pointer-events:all;}
+    .modal{background:var(--bg2);border:1px solid var(--border2);border-top:3px solid #ff4d6a;border-radius:var(--radius-lg);padding:32px;width:400px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.4);transform:translateY(16px);transition:transform .2s;}
+    .modal-overlay.open .modal{transform:translateY(0);}
+    .modal-title{font-family:var(--font-display);font-size:28px;margin-bottom:8px;color:var(--text);}
+    .modal-text{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6;}
+    .modal-actions{display:flex;gap:12px;justify-content:flex-end;}
+
+    /* Toast */
+    #toast-container{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:9999;}
+    .toast{background:var(--card);border:1px solid var(--border2);border-radius:var(--radius);padding:12px 18px;font-size:14px;font-family:var(--font-ui);letter-spacing:.5px;animation:toastIn .25s ease forwards;min-width:220px;}
+    .toast.success{border-left:3px solid var(--green);}
+    .toast.error{border-left:3px solid #ff4d6a;}
+    @keyframes toastIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+
+    /* Footer */
+    .footer{background:var(--bg2);border-top:1px solid var(--border);padding:20px 24px;text-align:center;font-size:12px;color:var(--text3);font-family:var(--font-ui);letter-spacing:1.5px;text-transform:uppercase;}
+
+    /* Loading */
+    .loading-row td{text-align:center;padding:32px;color:var(--text3);font-family:var(--font-ui);letter-spacing:1px;}
+
+    /* Responsive */
+    @media(max-width:768px){
+      .page-header h1{font-size:40px;}
+      .form-row{flex-direction:column;}
+      .data-table th:nth-child(3),.data-table td:nth-child(3){display:none;}
+      .navbar-inner{padding:0 16px;}
+      .page-content{padding:0 16px 40px;}
+    }
+    @media(max-width:480px){
+      .page-header h1{font-size:32px;}
+      .data-table th:nth-child(4),.data-table td:nth-child(4){display:none;}
+      .stat-grid{grid-template-columns:1fr 1fr;}
+    }
+  </style>
+</head>
+<body class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a class="nav-logo" href="index.html">🏁 KART<span>PIT</span></a>
+      <div class="nav-right">
+        <span class="nav-user">Ingelogd als <strong id="adminEmail">…</strong></span>
+        <button class="btn btn-ghost btn-sm" id="signOutBtn">Uitloggen</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-content">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <p class="eyebrow">Admin</p>
+      <h1>ACCOUNTBEHEER</h1>
+      <p class="subtitle">Maak nieuwe gebruikers aan en beheer bestaande accounts</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="card card-red">
+        <p class="card-title">Totaal accounts</p>
+        <p class="card-value" id="statTotal">—</p>
+      </div>
+      <div class="card card-green">
+        <p class="card-title">Gebruikers</p>
+        <p class="card-value" id="statUsers">—</p>
+      </div>
+      <div class="card card-blue">
+        <p class="card-title">Admins</p>
+        <p class="card-value" id="statAdmins">—</p>
+      </div>
+    </div>
+
+    <!-- Create account -->
+    <div class="section-header">
+      <h2 class="section-title">Nieuw account aanmaken</h2>
+    </div>
+
+    <div class="create-card">
+      <div class="alert" id="createAlert">
+        <span id="createAlertIcon">⚠</span>
+        <span id="createAlertText"></span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="newEmail">E-mailadres</label>
+          <input class="form-input" type="email" id="newEmail" placeholder="naam@kartpit.nl" />
+          <span class="form-error" id="emailErr">Voer een geldig e-mailadres in.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newName">Volledige naam</label>
+          <input class="form-input" type="text" id="newName" placeholder="Jan Janssen" />
+          <span class="form-error" id="nameErr">Naam mag niet leeg zijn.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="newPassword">Tijdelijk wachtwoord</label>
+          <input class="form-input" type="text" id="newPassword" placeholder="Min. 8 tekens" />
+          <span class="form-error" id="pwErr">Minimaal 8 tekens.</span>
+        </div>
+        <div class="form-group" style="max-width:160px;">
+          <label class="form-label" for="newRole">Rol</label>
+          <select class="form-select" id="newRole">
+            <option value="user">Gebruiker</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex:0;">
+          <label class="form-label">&nbsp;</label>
+          <button class="btn btn-red" id="createBtn">
+            + AANMAKEN
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Users table -->
+    <div class="section-header">
+      <h2 class="section-title">Alle accounts</h2>
+      <button class="btn btn-outline btn-sm" id="refreshBtn">↻ Vernieuwen</button>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Naam</th>
+            <th>E-mail</th>
+            <th>Rol</th>
+            <th>Aangemaakt</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="usersTableBody">
+          <tr class="loading-row"><td colspan="5">Accounts laden…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Delete confirm modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <h2 class="modal-title">ACCOUNT VERWIJDEREN</h2>
+      <p class="modal-text" id="deleteModalText">Weet je zeker dat je dit account wilt verwijderen? Dit kan niet ongedaan worden gemaakt.</p>
+      <div class="modal-actions">
+        <button class="btn btn-outline" id="cancelDelete">Annuleren</button>
+        <button class="btn btn-danger" id="confirmDelete">Verwijderen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <footer class="footer">&copy; 2025 KartPit — Alleen toegankelijk voor admins</footer>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    // ── CONFIG — vervang met jouw Supabase gegevens ──────────
+    const SUPABASE_URL        = 'https://jouw-project.supabase.co';
+    const SUPABASE_ANON       = 'jouw-anon-public-key';
+    // Service role key is nodig om gebruikers aan te maken via Admin API
+    // Bewaar deze NOOIT in front-end productie code — gebruik een Edge Function!
+    // Voor development/prototype kan je hem hier tijdelijk zetten.
+    const SUPABASE_SERVICE_KEY = 'jouw-service-role-key';
+    // ─────────────────────────────────────────────────────────
+
+    const supabase      = createClient(SUPABASE_URL, SUPABASE_ANON);
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+    // ── Auth guard ──────────────────────────────────────────
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { window.location.href = 'login.html'; }
+
+    const { data: myProfile } = await supabase
+      .from('profiles')
+      .select('role, full_name')
+      .eq('id', session.user.id)
+      .single();
+
+    if (!myProfile || myProfile.role !== 'admin') {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('adminEmail').textContent = session.user.email;
+
+    // ── Sign out ────────────────────────────────────────────
+    document.getElementById('signOutBtn').addEventListener('click', async () => {
+      await supabase.auth.signOut();
+      window.location.href = 'login.html';
+    });
+
+    // ── Toast ───────────────────────────────────────────────
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 3500);
+    }
+
+    // ── Show alert in create form ────────────────────────────
+    function showCreateAlert(msg, type = 'error') {
+      const banner = document.getElementById('createAlert');
+      banner.className = `alert ${type} visible`;
+      document.getElementById('createAlertIcon').textContent = type === 'error' ? '⚠' : '✓';
+      document.getElementById('createAlertText').textContent = msg;
+      setTimeout(() => banner.className = 'alert', 4000);
+    }
+
+    // ── Load users ───────────────────────────────────────────
+    async function loadUsers() {
+      const tbody = document.getElementById('usersTableBody');
+      tbody.innerHTML = '<tr class="loading-row"><td colspan="5">Accounts laden…</td></tr>';
+
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="5">Fout bij laden van accounts.</td></tr>';
+        return;
+      }
+
+      // Update stats
+      document.getElementById('statTotal').textContent  = profiles.length;
+      document.getElementById('statUsers').textContent  = profiles.filter(p => p.role === 'user').length;
+      document.getElementById('statAdmins').textContent = profiles.filter(p => p.role === 'admin').length;
+
+      if (!profiles.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Geen accounts gevonden</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = profiles.map(p => {
+        const isMe = p.id === session.user.id;
+        const date = new Date(p.created_at).toLocaleDateString('nl-NL', { day:'2-digit', month:'short', year:'numeric' });
+        const badge = p.role === 'admin'
+          ? '<span class="badge badge-red">Admin</span>'
+          : '<span class="badge badge-gray">Gebruiker</span>';
+
+        return `
+          <tr>
+            <td>${p.full_name || '—'} ${isMe ? '<span class="badge badge-green" style="margin-left:6px;">jij</span>' : ''}</td>
+            <td>${p.email || '—'}</td>
+            <td>${badge}</td>
+            <td>${date}</td>
+            <td style="text-align:right;">
+              ${!isMe ? `<button class="btn btn-danger btn-sm" onclick="promptDelete('${p.id}','${(p.email||'').replace(/'/g,"\\'")}')">Verwijderen</button>` : ''}
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    loadUsers();
+    document.getElementById('refreshBtn').addEventListener('click', loadUsers);
+
+    // ── Create account ────────────────────────────────────────
+    document.getElementById('createBtn').addEventListener('click', async () => {
+      // Reset errors
+      document.querySelectorAll('.form-error').forEach(e => e.classList.remove('visible'));
+
+      const email    = document.getElementById('newEmail').value.trim();
+      const name     = document.getElementById('newName').value.trim();
+      const password = document.getElementById('newPassword').value;
+      const role     = document.getElementById('newRole').value;
+
+      let valid = true;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('emailErr').classList.add('visible'); valid = false;
+      }
+      if (!name) {
+        document.getElementById('nameErr').classList.add('visible'); valid = false;
+      }
+      if (password.length < 8) {
+        document.getElementById('pwErr').classList.add('visible'); valid = false;
+      }
+      if (!valid) return;
+
+      const btn = document.getElementById('createBtn');
+      btn.disabled = true;
+      btn.textContent = 'BEZIG…';
+
+      // Create user via Admin API
+      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+
+      if (createError) {
+        showCreateAlert('Fout: ' + createError.message, 'error');
+        btn.disabled = false;
+        btn.textContent = '+ AANMAKEN';
+        return;
+      }
+
+      // Insert profile row
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .insert({ id: newUser.user.id, email, full_name: name, role });
+
+      btn.disabled = false;
+      btn.textContent = '+ AANMAKEN';
+
+      if (profileError) {
+        showCreateAlert('Account aangemaakt maar profiel mislukt: ' + profileError.message, 'error');
+        return;
+      }
+
+      showCreateAlert(`Account voor ${email} aangemaakt!`, 'success');
+      document.getElementById('newEmail').value    = '';
+      document.getElementById('newName').value     = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('newRole').value     = 'user';
+      loadUsers();
+    });
+
+    // ── Delete account ────────────────────────────────────────
+    let pendingDeleteId = null;
+
+    window.promptDelete = function(id, email) {
+      pendingDeleteId = id;
+      document.getElementById('deleteModalText').textContent =
+        `Weet je zeker dat je het account van "${email}" wilt verwijderen? Dit kan niet ongedaan worden gemaakt.`;
+      document.getElementById('deleteModal').classList.add('open');
+    };
+
+    document.getElementById('cancelDelete').addEventListener('click', () => {
+      document.getElementById('deleteModal').classList.remove('open');
+      pendingDeleteId = null;
+    });
+
+    document.getElementById('confirmDelete').addEventListener('click', async () => {
+      if (!pendingDeleteId) return;
+
+      document.getElementById('deleteModal').classList.remove('open');
+
+      // Delete profile first (FK constraint)
+      await supabaseAdmin.from('profiles').delete().eq('id', pendingDeleteId);
+      // Delete auth user
+      const { error } = await supabaseAdmin.auth.admin.deleteUser(pendingDeleteId);
+
+      if (error) {
+        toast('Verwijderen mislukt: ' + error.message, 'error');
+      } else {
+        toast('Account succesvol verwijderd.', 'success');
+        loadUsers();
+      }
+      pendingDeleteId = null;
+    });
+
+    // Close modal on overlay click
+    document.getElementById('deleteModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        e.currentTarget.classList.remove('open');
+        pendingDeleteId = null;
+      }
+    });
+  </script>
+</body>
+</html>
