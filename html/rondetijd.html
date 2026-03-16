@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartPit — Rondetijd</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body>
+    <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="nav-logo"><img src="../images/Vonk-Logo.png" alt="Vonk"></a>
+      <!-- <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="tracks.html">Tracks</a>
+        <a href="pitstop.html">Pitstop</a>
+        <a href="agenda.html">Agenda</a>
+        <a href="checklist.html">Checklist</a>
+      </div> -->
+    </div>
+  </nav>
+  <main class="page-content">
+    <div class="flex flex-row">
+      <div class="w-1/2">
+          <h2>Kart 1:</h2>
+          <br>
+            <div class="flex flex-row">
+              <div class="w-1/2">
+                  <h3>Rondetijd:</h3>
+                  <form method="post">
+                      <div class="time-input">
+                        <input type="number" id="minutes" min="0" max="59" maxlength="2" placeholder="mm" oninput="moveToNext(this, 'seconds')" /> :
+                        <input type="number" id="seconds" min="0" max="59" maxlength="2" placeholder="ss" oninput="moveToNext(this, 'milliseconds')" /> :
+                        <input type="number" id="milliseconds" min="0" max="999" maxlength="3" placeholder="ms" />
+                        <script>
+                          function moveToNext(currentInput, nextInputId) {
+                          const maxLength = parseInt(currentInput.getAttribute('maxlength'));
+                          if (currentInput.value.length >= maxLength) {
+                          document.getElementById(nextInputId).focus();
+                            }
+                          }
+                        </script>
+                      </div>
+                      <br><br>
+                      <input type="submit">
+                  </form>
+                  <br><br>
+                  <h3>Snelste tijd:</h3>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br><br>
+                  <h3>Langzaamste tijd:</h3>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+              </div>
+              <div class="w-1/2">
+                  <h3>Gem. tijd:</h3>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br><br>
+                  <h3>Laatste tijden:</h3>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br>
+              </div>
+            </div>
+          </div>
+          <div class="w-1/2">
+            <h2>Kart 2:</h2>
+            <br>
+            <div class="flex flex-row">
+              <div class="w-1/2">
+                  <h3>Rondetijd:</h3>
+                  <form method="post">
+                      <div class="time-input">
+                        <input type="number" id="minutes" min="0" max="59" maxlength="2" placeholder="mm" oninput="moveToNext(this, 'seconds')" /> :
+                        <input type="number" id="seconds" min="0" max="59" maxlength="2" placeholder="ss" oninput="moveToNext(this, 'milliseconds')" /> :
+                        <input type="number" id="milliseconds" min="0" max="999" maxlength="3" placeholder="ms" />
+                        <script>
+                          function moveToNext(currentInput, nextInputId) {
+                          const maxLength = parseInt(currentInput.getAttribute('maxlength'));
+                          if (currentInput.value.length >= maxLength) {
+                          document.getElementById(nextInputId).focus();
+                            }
+                          }
+                        </script>
+                      </div>
+                      <br><br>
+                      <input type="submit">
+                  </form>
+                  <br><br>
+                  <h3>Snelste tijd:</h3>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br><br>
+                  <h3>Langzaamste tijd:</h3>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+              </div>
+              <div class="w-1/2">
+                  <h3>Gem. tijd:</h3>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br><br>
+                  <h3>Laatste tijden:</h3>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br>
+                  <h4>XX:XX,xxx</h4>
+                  <br>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="justify-items-center">
+      <br>
+      <h5>Sla tijden op (na de race):</h5>
+      <form method="post">
+        <input type="submit">
+      </form>
+    </div>
+  </main>
+</body>
+</html>
