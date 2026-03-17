@@ -29,8 +29,10 @@
         <input type="number" id="target-time" placeholder="bijv. 8" step="0.1" min="0" style="width:120px;text-align:center" />
       </div>
       <div class="timer-controls">
-        <button id="btn-start" class="btn btn-red btn-lg">▶ START</button>
-        <button id="btn-stop"  class="btn btn-outline btn-lg" disabled>⏸ STOP</button>
+        <div class="play-pause-container">
+          <button id="btn-start" class="btn btn-red btn-lg btn-play-pause">▶ START</button>
+          <button id="btn-stop"  class="btn btn-outline btn-lg btn-play-pause" disabled>⏸ STOP</button>
+        </div>
         <button id="btn-reset" class="btn btn-outline btn-lg">↺ RESET</button>
         <button id="btn-save"  class="btn btn-outline btn-lg" disabled>💾 OPSLAAN</button>
       </div>
@@ -88,7 +90,9 @@
 <div id="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
 <script src="../js/supabase.config.js"></script>
+<script src="../js/notifications.js"></script>
 <script src="../js/main.js"></script>
 <script src="../js/timer.js"></script>
 </body>
