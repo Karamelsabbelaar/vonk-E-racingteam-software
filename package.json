@@ -1,0 +1,35 @@
+{
+  "name": "kartpit-racing",
+  "version": "1.0.0",
+  "description": "KartPit - Amateur Karting Race Manager with native APK support",
+  "main": "app.py",
+  "scripts": {
+    "build": "echo 'Build complete'",
+    "start": "ionic serve",
+    "android": "ionic capacitor build android --prod",
+    "android:open": "ionic capacitor open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^5.4.0",
+    "@capacitor/local-notifications": "^5.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^5.4.0",
+    "@capacitor/android": "^5.4.0"
+  },
+  "overrides": {
+    "tar": ">=6.2.0",
+    "glob": ">=9.3.0",
+    "yauzl": ">=3.2.1"
+  },
+  "keywords": [
+    "kart",
+    "racing",
+    "pitstop",
+    "timer",
+    "capacitor",
+    "native"
+  ],
+  "author": "Vonk Racing",
+  "license": "MIT"
+}

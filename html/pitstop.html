@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KartPit — Pitstop Timer</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="wrapper">
 
   <nav class="navbar">
     <div class="navbar-inner">
-      <a href="index.html" class="nav-logo"><img src="../images/Vonk-Logo.png" alt="Vonk"></a>
+      <button id="btn-back" class="btn-nav-back" onclick="window.history.back()" title="Terug">← Back</button>
+      <a href="index.html" class="nav-logo"><img src="images/Vonk-Logo.png" alt="Vonk"></a>
   </nav>
 
   <main class="page-content">
@@ -19,7 +20,7 @@
     <div class="page-header">
       <div class="eyebrow">Race Tools</div>
       <h1>PITSTOP TIMER</h1>
-      <p class="subtitle">Meet & log je pitstop tijden. Spatie = start/stop &nbsp;|&nbsp; R = reset</p>
+      <p class="subtitle">Meet & log je pitstop tijden</p>
     </div>
 
     <div class="card" style="text-align:center;margin-bottom:24px">
@@ -90,8 +91,10 @@
 <div id="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/supabase.config.js"></script>
-<script src="../js/main.js"></script>
-<script src="../js/timer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
+<script src="js/supabase.config.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/main.js"></script>
+<script src="js/timer.js"></script>
 </body>
 </html>

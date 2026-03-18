@@ -4,10 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KartPit — Home</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/supabase.config.js"></script>
-<script src="../js/main.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+
+
 </head>
 <body>
 <div class="wrapper">
@@ -35,24 +34,36 @@
     </div>
     <div class="quicknav-grid">
       <a href="tracks.html" class="quicknav-card">
-        <div class="quicknav-icon">🗺️</div>
+        <div class="quicknav-icon">🚥</div>
         <div class="quicknav-label">Tracks</div>
-        <div class="quicknav-sub">Circuit info & notities</div>
       </a>
       <a href="pitstop.html" class="quicknav-card">
         <div class="quicknav-icon">⏱️</div>
         <div class="quicknav-label">Pitstop Timer</div>
-        <div class="quicknav-sub">Live stopwatch & history</div>
       </a>
       <a href="agenda.html" class="quicknav-card">
         <div class="quicknav-icon">📋</div>
         <div class="quicknav-label">Race Agenda</div>
-        <div class="quicknav-sub">Schema & sessies</div>
       </a>
       <a href="checklist.html" class="quicknav-card">
         <div class="quicknav-icon">✅</div>
         <div class="quicknav-label">Checklist</div>
-        <div class="quicknav-sub">Kart & team gereedheid</div>
+      </a>
+      <a href="" class="quicknav-card">
+        <div class="quicknav-icon">📜</div>
+        <div class="quicknav-label">Technische Handleiding</div>
+      </a>
+      <a href="rondetijd.html" class="quicknav-card">
+        <div class="quicknav-icon">🕒</div>
+        <div class="quicknav-label">Ronde Tijden</div>
+      </a>
+      <a href="" class="quicknav-card">
+        <div class="quicknav-icon">📋</div>
+        <div class="quicknav-label">Takenlijst</div>
+      </a>
+      <a href="" class="quicknav-card">
+        <div class="quicknav-icon">📅</div>
+        <div class="quicknav-label">Rijdag schema</div>
       </a>
     </div>
 
@@ -78,7 +89,9 @@
 <div id="toast-container"></div>
 
 <!-- Supabase SDK -->
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.config.js"></script>
+<script src="js/main.js"></script>
 <script>
   const TYPE_BADGE = {
     race: 'badge-red', qualifying: 'badge-yellow',

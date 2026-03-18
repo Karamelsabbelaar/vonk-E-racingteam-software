@@ -1,0 +1,16 @@
+{
+  "appId": "com.vonkracing.kartpit",
+  "appName": "KartPit",
+  "webDir": "html",
+  "build": {
+    "android": {
+      "minWebViewVersion": 90
+    }
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_notification",
+      "iconColor": "#F8AB21"
+    }
+  }
+}

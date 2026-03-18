@@ -111,6 +111,25 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
 .nav-logo span { color: var(--text); }
 .nav-logo .flag { max-width: 50%;}
 
+.btn-nav-back {
+  background: transparent;
+  border: none;
+  color: var(--text2);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: color .2s, background .2s;
+  margin-right: 12px;
+}
+.btn-nav-back:hover {
+  background: rgba(248, 171, 33, 0.1);
+  color: var(--red);
+}
+
 .nav-links {
   display: flex;
   gap: 2px;
@@ -848,4 +867,14 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   .btn-play-pause:disabled {
     display: none;
   }
+}
+
+.time-input {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.time-input input {
+  width: 50px;
+  text-align: center;
 }
