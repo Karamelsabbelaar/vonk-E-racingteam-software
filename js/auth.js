@@ -6,8 +6,8 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 // ── Config ── Replace with your Supabase project details
-export const SUPABASE_URL  = 'https://jouw-project.supabase.co';
-export const SUPABASE_ANON = 'jouw-anon-public-key';
+export const SUPABASE_URL  = 'https://tzzuxemddkgvgipsaadr.supabase.co';
+export const SUPABASE_ANON = 'sb_publishable_hV5vJlRZn0MOwQFErJPbww_9605nepF';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -20,7 +20,7 @@ export async function getSession() {
 // ── Get profile row (includes role) ─────────────────────
 export async function getProfile(userId) {
   const { data, error } = await supabase
-    .from('profiles')
+    .from('Profiles')
     .select('*')
     .eq('id', userId)
     .single();
