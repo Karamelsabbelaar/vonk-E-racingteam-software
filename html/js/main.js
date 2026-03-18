@@ -128,4 +128,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  document.addEventListener('DOMContentLoaded', renderTracks);
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('tracks-grid')) renderTracks();
+  });
+
+// ── Agenda preview (homepage) ──────────────────────────────────
+async function loadAgendaPreview() {
+  const tbody = document.getElementById('agenda-preview');
+  if (!tbody) return;
+  const TYPE_BADGE = {
+    race: 'badge-red', qualifying: 'badge-yellow',
+    session: 'badge-blue', pitstop: 'badge-green'
+  };
+  try {
+    const agenda = await Agenda.getAll();
+    if (!agenda.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text3);text-align:center;padding:24px">Geen events gepland</td></tr>';
+      return;
+    }
+    tbody.innerHTML = agenda.slice(0, 5).map(item => `
+      <tr>
+        <td style="font-family:var(--font-display);font-size:18px;color:var(--text2)">${item.time}</td>
+        <td>${item.event}</td>
+        <td><span class="badge ${TYPE_BADGE[item.type] || 'badge-gray'}">${item.type}</span></td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--red)">Fout: ${e.message}</td></tr>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('agenda-preview')) loadAgendaPreview();
+});
