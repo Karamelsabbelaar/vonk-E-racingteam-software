@@ -1,4 +1,5 @@
 const knop = document.getElementById('toevoegknop');
+const Klik = document.getElementById('nameButton1');
 let Rondes = 0;
 let Fast = 999999999;
 let Slow = 0;
@@ -15,6 +16,15 @@ let MS2 = 0;
 let MM1 = 0;
 let SS1 = 0;
 let MS1 = 0;
+
+Klik.addEventListener('click', () => {
+    let Name1 = document.forms["Name1"]["nameInput1"].value;
+
+    const EName1 = document.getElementById("Name1");
+    EName1.remove();
+    const TextName1 = document.getElementById("TextName1");
+    TextName1.textContent = Name1;
+});
 
 function toMilliseconds(MM, SS, MS)
 {
