@@ -66,5 +66,4 @@ Het script regelt alles automatisch en kopieert de APK naar je bureaublad.
 ### Volgende stappen
 
 1. Installeer de vereisten hierboven
-2. Voer het build script uit
-3. Of open handmatig in Android Studio met `npx cap open android`
+2. Voer het build script uit | Of open handmatig in Android Studio met `npx cap open android`
