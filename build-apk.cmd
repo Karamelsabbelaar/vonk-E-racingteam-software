@@ -62,7 +62,9 @@ if exist "!ICONS_SRC!" (
 REM Setup Android local properties (Android SDK path)
 echo [*] Configuring Android SDK...
 if not exist "android\local.properties" (
-    echo sdk.dir=%LOCALAPPDATA%\Android\Sdk > "android\local.properties"
+    set SDK_PATH=%LOCALAPPDATA%\Android\Sdk
+    set SDK_PATH=!SDK_PATH:\=/!
+    echo sdk.dir=!SDK_PATH! > "android\local.properties"
     echo [+] Android SDK path configured
 )
 
