@@ -33,10 +33,14 @@ echo "[+] Dependencies installed"
 
 # Sync Capacitor (copies web assets and generates config files directly into android/app/src/main/assets)
 echo "[*] Syncing Capacitor..."
-npx cap sync android
+npx cap sync android 2>/dev/null
 if [ $? -ne 0 ]; then
-    echo "[-] cap sync failed"
-    exit 1
+    echo "[-] cap sync android failed, using manual asset copy fallback"
+    mkdir -p "$SCRIPT_DIR/android/app/src/main/assets/public"
+    cp -r "$SCRIPT_DIR/html/"* "$SCRIPT_DIR/android/app/src/main/assets/public/"
+    echo "[+] Assets copied manually"
+else
+    echo "[+] cap sync complete"
 fi
 
 # Copy icons from repo into Android project

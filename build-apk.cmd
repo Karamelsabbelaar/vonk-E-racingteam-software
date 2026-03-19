@@ -35,11 +35,15 @@ echo [+] Dependencies installed
 
 REM Sync Capacitor (copies web assets and generates config files directly into android/app/src/main/assets)
 echo [*] Syncing Capacitor...
-call npx cap sync android
+call npx cap sync android 2>nul
 if %errorlevel% neq 0 (
-    echo [-] cap sync failed
-    pause
-    exit /b 1
+    echo [-] cap sync android failed, using manual asset copy fallback
+    set ASSETS_DIR=%~dp0android\app\src\main\assets
+    if not exist "!ASSETS_DIR!\public" ( mkdir "!ASSETS_DIR!\public" )
+    xcopy "%~dp0html\*" "!ASSETS_DIR!\public\" /E /I /Y >nul 2>&1
+    echo [+] Assets copied manually
+) else (
+    echo [+] cap sync complete
 )
 
 REM Copy icons from repo into Android project
