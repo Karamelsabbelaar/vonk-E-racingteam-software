@@ -3,8 +3,13 @@ node_modules/
 package-lock.json
 yarn.lock
 
-# Android
-android/
+# Android - ignore build artifacts and generated files, keep the project source
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/capacitor-cordova-android-plugins/
+android/android-template/
 ios/
 www/
 

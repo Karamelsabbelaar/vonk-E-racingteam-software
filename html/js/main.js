@@ -54,10 +54,44 @@ function setActiveNav() {
   });
 }
 
+// ── Back navigation with exit animation ──────────────────────
+function navigateBack(url) {
+  const wrapper = document.querySelector('.wrapper');
+  if (!wrapper) { location.href = url; return; }
+  wrapper.classList.add('exiting');
+  wrapper.addEventListener('animationend', () => { location.href = url; }, { once: true });
+}
+
+function initBackTransition() {
+  const currentPage = location.pathname.split('/').pop() || 'index.html';
+  if (currentPage === 'index.html') return;
+
+  // Logo / any link pointing back to index.html
+  document.querySelectorAll('a[href="index.html"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      navigateBack('index.html');
+    });
+  });
+
+  // Android hardware back button (Capacitor)
+  if (window.Capacitor?.Plugins?.App) {
+    window.Capacitor.Plugins.App.addListener('backButton', () => {
+      navigateBack('index.html');
+    });
+  }
+}
+
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   Modal.init();
   setActiveNav();
+  initBackTransition();
+
+  // Fullscreen: hide status bar — only on Capacitor (Android), not in browser
+  if (window.Capacitor && document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
 });
 
 // Tracks toevoegen //
@@ -86,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="track-body">
             <div class="track-stat"><span class="track-stat-label">Lengte</span><span class="track-stat-value">${t.length_m}m</span></div>
             <div class="track-stat"><span class="track-stat-label">Bochten</span><span class="track-stat-value">${t.turns}</span></div>
-            <div class="track-stat"><span class="track-stat-label">Beste Ronde</span><span class="track-stat-value" style="color:var(--yellow)">${t.best_lap}</span></div>
+            <div class="track-stat"><span class="track-stat-label">Datum</span><span class="track-stat-value" style="color:var(--yellow)">${t.track_date}</span></div>
             ${t.notes ? `<div class="track-notes">💡 ${t.notes}</div>` : ''}
           </div>
         </div>`).join('');
@@ -105,11 +139,13 @@ document.addEventListener('DOMContentLoaded', () => {
         location: get('tr-loc'),
         length_m: parseInt(get('tr-len')) || 0,
         turns:    parseInt(get('tr-turns')) || 0,
-        best_lap: get('tr-lap') || '–',
+        track_date:get('tr-date') || '–',
         type:     get('tr-type'),
-        notes:    get('tr-notes')
+        notes:    get('tr-notes'),
+        layout:    get('tr-layout') || '–' 
+
       });
-      ['tr-name','tr-loc','tr-len','tr-turns','tr-lap','tr-notes'].forEach(id => document.getElementById(id).value = '');
+      ['tr-name','tr-loc','tr-len','tr-turns','tr-date','tr-notes'].forEach(id => document.getElementById(id).value = '');
       Toast.show('Track toegevoegd', 'success');
       renderTracks();
     } catch(e) {
@@ -128,4 +164,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  document.addEventListener('DOMContentLoaded', renderTracks);
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('tracks-grid')) renderTracks();
+  });
+
+// ── Agenda preview (homepage) ──────────────────────────────────
+async function loadAgendaPreview() {
+  const tbody = document.getElementById('agenda-preview');
+  if (!tbody) return;
+  const TYPE_BADGE = {
+    race: 'badge-red', qualifying: 'badge-yellow',
+    session: 'badge-blue', pitstop: 'badge-green'
+  };
+  try {
+    const agenda = await Agenda.getAll();
+    if (!agenda.length) {
+      tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text3);text-align:center;padding:24px">Geen events gepland</td></tr>';
+      return;
+    }
+    tbody.innerHTML = agenda.slice(0, 5).map(item => `
+      <tr>
+        <td style="font-family:var(--font-display);font-size:18px;color:var(--text2)">${item.time}</td>
+        <td>${item.event}</td>
+        <td><span class="badge ${TYPE_BADGE[item.type] || 'badge-gray'}">${item.type}</span></td>
+      </tr>`).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--red)">Fout: ${e.message}</td></tr>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('agenda-preview')) loadAgendaPreview();
+});

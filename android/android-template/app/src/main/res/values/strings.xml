@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">KartPit</string>
+    <string name="title_activity_main">KartPit</string>
+    <string name="package_name">com.vonkracing.kartpit</string>
+    <string name="custom_url_scheme">com.vonkracing.kartpit</string>
+</resources>
