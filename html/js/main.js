@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="track-body">
             <div class="track-stat"><span class="track-stat-label">Lengte</span><span class="track-stat-value">${t.length_m}m</span></div>
             <div class="track-stat"><span class="track-stat-label">Bochten</span><span class="track-stat-value">${t.turns}</span></div>
-            <div class="track-stat"><span class="track-stat-label">Beste Ronde</span><span class="track-stat-value" style="color:var(--yellow)">${t.best_lap}</span></div>
+            <div class="track-stat"><span class="track-stat-label">Datum</span><span class="track-stat-value" style="color:var(--yellow)">${t.track_date}</span></div>
             ${t.notes ? `<div class="track-notes">💡 ${t.notes}</div>` : ''}
           </div>
         </div>`).join('');
@@ -105,11 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
         location: get('tr-loc'),
         length_m: parseInt(get('tr-len')) || 0,
         turns:    parseInt(get('tr-turns')) || 0,
-        best_lap: get('tr-lap') || '–',
+        track_date:get('tr-date') || '–',
         type:     get('tr-type'),
-        notes:    get('tr-notes')
+        notes:    get('tr-notes'),
+        layout:    get('tr-layout') || '–' 
+
       });
-      ['tr-name','tr-loc','tr-len','tr-turns','tr-lap','tr-notes'].forEach(id => document.getElementById(id).value = '');
+      ['tr-name','tr-loc','tr-len','tr-turns','tr-date','tr-notes'].forEach(id => document.getElementById(id).value = '');
       Toast.show('Track toegevoegd', 'success');
       renderTracks();
     } catch(e) {
