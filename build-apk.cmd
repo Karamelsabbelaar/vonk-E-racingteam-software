@@ -33,31 +33,23 @@ if %errorlevel% neq 0 (
 )
 echo [+] Dependencies installed
 
-REM Sync Capacitor (this copies web assets + generates capacitor.config.json, capacitor.plugins.json, cordova.js)
+REM Sync Capacitor (copies web assets and generates config files directly into android/app/src/main/assets)
 echo [*] Syncing Capacitor...
-call npx cap sync 2>nul
-REM The sync copies to android\app\src\main\assets but we build from android\android-template
-REM So we copy everything over
-
-REM Copy ALL assets from cap sync output to the build directory
-echo [*] Copying assets to build directory...
-set CAP_ASSETS=%~dp0android\app\src\main\assets
-set BUILD_ASSETS=%~dp0android\android-template\app\src\main\assets
-if not exist "!BUILD_ASSETS!" ( mkdir "!BUILD_ASSETS!" )
-if exist "!CAP_ASSETS!" (
-    xcopy "!CAP_ASSETS!\*" "!BUILD_ASSETS!\" /E /I /Y >nul 2>&1
-    echo [+] Assets copied from cap sync output
+call npx cap sync android 2>nul
+if %errorlevel% neq 0 (
+    echo [-] cap sync android failed, using manual asset copy fallback
+    set ASSETS_DIR=%~dp0android\app\src\main\assets
+    if not exist "!ASSETS_DIR!\public" ( mkdir "!ASSETS_DIR!\public" )
+    xcopy "%~dp0html\*" "!ASSETS_DIR!\public\" /E /I /Y >nul 2>&1
+    echo [+] Assets copied manually
 ) else (
-    REM Fallback: manually copy html and generate minimal config
-    echo [-] Warning: cap sync output not found, using manual copy
-    if not exist "!BUILD_ASSETS!\public" ( mkdir "!BUILD_ASSETS!\public" )
-    xcopy "%~dp0html\*" "!BUILD_ASSETS!\public\" /E /I /Y >nul 2>&1
+    echo [+] cap sync complete
 )
 
 REM Copy icons from repo into Android project
 echo [*] Copying app icons...
 set ICONS_SRC=%~dp0icons
-set ICONS_DST=%~dp0android\android-template\app\src\main\res
+set ICONS_DST=%~dp0android\app\src\main\res
 if exist "!ICONS_SRC!" (
     for %%d in (mipmap-mdpi mipmap-hdpi mipmap-xhdpi mipmap-xxhdpi mipmap-xxxhdpi mipmap-anydpi-v26) do (
         if exist "!ICONS_SRC!\%%d" ( xcopy "!ICONS_SRC!\%%d\*" "!ICONS_DST!\%%d\" /I /Y >nul 2>&1 )
@@ -69,16 +61,18 @@ if exist "!ICONS_SRC!" (
 
 REM Setup Android local properties (Android SDK path)
 echo [*] Configuring Android SDK...
-if not exist "android\android-template\local.properties" (
-    echo sdk.dir=%LOCALAPPDATA%\Android\Sdk > "android\android-template\local.properties"
+if not exist "android\local.properties" (
+    set SDK_PATH=%LOCALAPPDATA%\Android\Sdk
+    set SDK_PATH=!SDK_PATH:\=/!
+    echo sdk.dir=!SDK_PATH!> "android\local.properties"
     echo [+] Android SDK path configured
 )
 
-REM Navigate to android/android-template
+REM Navigate to android/
 echo [*] Building Android APK...
-cd /d "%~dp0android\android-template"
+cd /d "%~dp0android"
 if not exist "gradlew.bat" (
-    echo [-] gradlew.bat not found in android\android-template
+    echo [-] gradlew.bat not found in android\
     pause
     exit /b 1
 )
