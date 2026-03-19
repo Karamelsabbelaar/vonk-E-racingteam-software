@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@capacitor/android": "^5.4.0",
-    "@capacitor/cli": "^5.4.0"
+    "@capacitor/cli": "^8.2.0"
   },
   "overrides": {
     "tar": ">=6.2.0",
