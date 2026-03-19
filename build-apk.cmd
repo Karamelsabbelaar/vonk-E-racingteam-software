@@ -64,7 +64,7 @@ echo [*] Configuring Android SDK...
 if not exist "android\local.properties" (
     set SDK_PATH=%LOCALAPPDATA%\Android\Sdk
     set SDK_PATH=!SDK_PATH:\=/!
-    echo sdk.dir=!SDK_PATH! > "android\local.properties"
+    echo sdk.dir=!SDK_PATH!> "android\local.properties"
     echo [+] Android SDK path configured
 )
 
