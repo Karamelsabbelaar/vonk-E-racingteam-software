@@ -23,8 +23,13 @@
   <main class="page-content">
     <div class="flex flex-row">
       <div class="w-1/2">
-          <h2>Kart 1:</h2>
+          <h2>VR1:</h2>
           <br>
+          <h2 id="TextName1"></h2>
+          <form id="Name1">
+            <input type="text" id="nameInput1" placeholder="Naam bestuurder 1">
+            <button type="button" id="nameButton1">Bevestig</button>
+          </form>
             <div class="flex flex-row">
               <div class="w-1/2">
                   <h3>Rondetijd:</h3>
@@ -32,7 +37,7 @@
                       <div class="time-input">
                         <input type="number" id="minutes" min="0" max="59" maxlength="2" placeholder="mm" oninput="moveToNext(this, 'seconds')" /> :
                         <input type="number" id="seconds" min="0" max="59" maxlength="2" placeholder="ss" oninput="moveToNext(this, 'milliseconds')" /> :
-                        <input type="number" id="milliseconds" min="0" max="999" maxlength="3" placeholder="ms" />
+                        <input type="number" id="milliseconds" min="0" max="999" maxlength="3" placeholder="ms" oninput="moveToNext(this, 'toevoegknop')" />
                         <script>
                           function moveToNext(currentInput, nextInputId) {
                           const maxLength = parseInt(currentInput.getAttribute('maxlength'));
@@ -71,16 +76,21 @@
             </div>
           </div>
           <div class="w-1/2">
-            <h2>Kart 2:</h2>
+            <h2>VR2:</h2>
             <br>
+            <h2 id="TextName2"></h2>
+            <form id="Name2">
+            <input type="text" id="nameInput2" placeholder="Naam bestuurder 2">
+            <button type="button" id="nameButton2">Bevestig</button>
+          </form>
             <div class="flex flex-row">
               <div class="w-1/2">
                   <h3>Rondetijd:</h3>
                   <form method="post" id="Kart2">
                       <div class="time-input">
-                        <input type="number" id="minutes" min="0" max="59" maxlength="2" placeholder="mm" oninput="moveToNext(this, 'seconds')" /> :
-                        <input type="number" id="seconds" min="0" max="59" maxlength="2" placeholder="ss" oninput="moveToNext(this, 'milliseconds')" /> :
-                        <input type="number" id="milliseconds" min="0" max="999" maxlength="3" placeholder="ms" />
+                        <input type="number" id="minutesB" min="0" max="59" maxlength="2" placeholder="mm" oninput="moveToNext(this, 'secondsB')" /> :
+                        <input type="number" id="secondsB" min="0" max="59" maxlength="2" placeholder="ss" oninput="moveToNext(this, 'millisecondsB')" /> :
+                        <input type="number" id="millisecondsB" min="0" max="999" maxlength="3" placeholder="ms" oninput="moveToNext(this, 'toevoegknop2')" />
                         <script>
                           function moveToNext(currentInput, nextInputId) {
                           const maxLength = parseInt(currentInput.getAttribute('maxlength'));
@@ -91,29 +101,135 @@
                         </script>
                       </div>
                       <br><br>
-                      <input type="submit">
+                      <button type="button" id="toevoegknop2">Bevestig</button>
                   </form>
                   <br><br>
                   <h3>Snelste tijd:</h3>
                   <br>
-                  <h4>XX:XX,xxx</h4>
+                  <h4 id="FastTimeB">XX:XX,xxx</h4>
                   <br><br>
                   <h3>Langzaamste tijd:</h3>
                   <br>
-                  <h4>XX:XX,xxx</h4>
+                  <h4 id="SlowTimeB">XX:XX,xxx</h4>
               </div>
               <div class="w-1/2">
                   <h3>Gem. tijd:</h3>
                   <br>
-                  <h4>XX:XX,xxx</h4>
+                  <h4 id="GemTimeB">XX:XX,xxx</h4>
                   <br><br>
                   <h3>Laatste tijden:</h3>
                   <br>
-                  <h4>XX:XX,xxx</h4>
+                  <h4 id="Ronde1B">XX:XX,xxx</h4>
                   <br>
-                  <h4>XX:XX,xxx</h4>
+                  <h4 id="Ronde2B">XX:XX,xxx</h4>
                   <br>
-                  <h4>XX:XX,xxx</h4>
+                  <h4 id="Ronde3B">XX:XX,xxx</h4>
+                  <br>
+              </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-row">
+      <div class="w-1/2">
+          <br>
+          <h2 id="TextName3"></h2>
+          <form id="Name3">
+            <input type="text" id="nameInput3" placeholder="Naam bestuurder 3">
+            <button type="button" id="nameButton3">Bevestig</button>
+          </form>
+            <div class="flex flex-row">
+              <div class="w-1/2">
+                  <h3>Rondetijd:</h3>
+                  <form id="Kart3">
+                      <div class="time-input">
+                        <input type="number" id="minutesC" min="0" max="59" maxlength="2" placeholder="mm" oninput="moveToNext(this, 'secondsC')" /> :
+                        <input type="number" id="secondsC" min="0" max="59" maxlength="2" placeholder="ss" oninput="moveToNext(this, 'millisecondsC')" /> :
+                        <input type="number" id="millisecondsC" min="0" max="999" maxlength="3" placeholder="ms" oninput="moveToNext(this, 'toevoegknop3')" />
+                        <script>
+                          function moveToNext(currentInput, nextInputId) {
+                          const maxLength = parseInt(currentInput.getAttribute('maxlength'));
+                          if (currentInput.value.length >= maxLength) {
+                          document.getElementById(nextInputId).focus();
+                            }
+                          }
+                        </script>
+                      </div>
+                      <br><br>
+                      <button type="button" id="toevoegknop3">Bevestig</button>
+                  </form>
+                  <br><br>
+                  <h3>Snelste tijd:</h3>
+                  <br>
+                  <h4 id="FastTimeC">XX:XX,xxx</h4>
+                  <br><br>
+                  <h3>Langzaamste tijd:</h3>
+                  <br>
+                  <h4 id="SlowTimeC">XX:XX,xxx</h4>
+              </div>
+              <div class="w-1/2">
+                  <h3>Gem. tijd:</h3>
+                  <br>
+                  <h4 id="GemTimeC">XX:XX,xxx</h4>
+                  <br><br>
+                  <h3>Laatste tijden:</h3>
+                  <br>
+                  <h4 id="Ronde1C">XX:XX,xxx</h4>
+                  <br>
+                  <h4 id="Ronde2C">XX:XX,xxx</h4>
+                  <br>
+                  <h4 id="Ronde3C">XX:XX,xxx</h4>
+                  <br>
+              </div>
+            </div>
+          </div>
+          <div class="w-1/2">
+            <br>
+            <h2 id="TextName4"></h2>
+            <form id="Name4">
+            <input type="text" id="nameInput4" placeholder="Naam bestuurder 4">
+            <button type="button" id="nameButton4">Bevestig</button>
+          </form>
+            <div class="flex flex-row">
+              <div class="w-1/2">
+                  <h3>Rondetijd:</h3>
+                  <form method="post" id="Kart4">
+                      <div class="time-input">
+                        <input type="number" id="minutesD" min="0" max="59" maxlength="2" placeholder="mm" oninput="moveToNext(this, 'secondsD')" /> :
+                        <input type="number" id="secondsD" min="0" max="59" maxlength="2" placeholder="ss" oninput="moveToNext(this, 'millisecondsD')" /> :
+                        <input type="number" id="millisecondsD" min="0" max="999" maxlength="3" placeholder="ms" oninput="moveToNext(this, 'toevoegknop4')" />
+                        <script>
+                          function moveToNext(currentInput, nextInputId) {
+                          const maxLength = parseInt(currentInput.getAttribute('maxlength'));
+                          if (currentInput.value.length >= maxLength) {
+                          document.getElementById(nextInputId).focus();
+                            }
+                          }
+                        </script>
+                      </div>
+                      <br><br>
+                      <button type="button" id="toevoegknop4">Bevestig</button>
+                  </form>
+                  <br><br>
+                  <h3>Snelste tijd:</h3>
+                  <br>
+                  <h4 id="FastTimeD">XX:XX,xxx</h4>
+                  <br><br>
+                  <h3>Langzaamste tijd:</h3>
+                  <br>
+                  <h4 id="SlowTimeD">XX:XX,xxx</h4>
+              </div>
+              <div class="w-1/2">
+                  <h3>Gem. tijd:</h3>
+                  <br>
+                  <h4 id="GemTimeD">XX:XX,xxx</h4>
+                  <br><br>
+                  <h3>Laatste tijden:</h3>
+                  <br>
+                  <h4 id="Ronde1D">XX:XX,xxx</h4>
+                  <br>
+                  <h4 id="Ronde2D">XX:XX,xxx</h4>
+                  <br>
+                  <h4 id="Ronde3D">XX:XX,xxx</h4>
                   <br>
               </div>
             </div>
@@ -123,10 +239,13 @@
       <br>
       <h5>Sla tijden op (na de race):</h5>
       <form method="post">
-        <input type="submit">
+        <button type="button" id="saveButton">Opslaan</button>
       </form>
     </div>
   </main>
   <script src="js/rondetijd.js"></script>
+  <script src="js/rondetijd2.js"></script>
+  <script src="js/rondetijd3.js"></script>
+  <script src="js/rondetijd4.js"></script>
 </body>
 </html>
