@@ -54,10 +54,39 @@ function setActiveNav() {
   });
 }
 
+// ── Back navigation with exit animation ──────────────────────
+function navigateBack(url) {
+  const wrapper = document.querySelector('.wrapper');
+  if (!wrapper) { location.href = url; return; }
+  wrapper.classList.add('exiting');
+  wrapper.addEventListener('animationend', () => { location.href = url; }, { once: true });
+}
+
+function initBackTransition() {
+  const currentPage = location.pathname.split('/').pop() || 'index.html';
+  if (currentPage === 'index.html') return;
+
+  // Logo / any link pointing back to index.html
+  document.querySelectorAll('a[href="index.html"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      navigateBack('index.html');
+    });
+  });
+
+  // Android hardware back button (Capacitor)
+  if (window.Capacitor?.Plugins?.App) {
+    window.Capacitor.Plugins.App.addListener('backButton', () => {
+      navigateBack('index.html');
+    });
+  }
+}
+
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   Modal.init();
   setActiveNav();
+  initBackTransition();
 
   // Fullscreen: hide status bar — only on Capacitor (Android), not in browser
   if (window.Capacitor && document.documentElement.requestFullscreen) {
