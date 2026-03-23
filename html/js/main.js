@@ -64,22 +64,55 @@ function navigateBack(url) {
 
 function initBackTransition() {
   const currentPage = location.pathname.split('/').pop() || 'index.html';
-  if (currentPage === 'index.html') return;
 
-  // Logo / any link pointing back to index.html
-  document.querySelectorAll('a[href="index.html"]').forEach(a => {
-    a.addEventListener('click', e => {
-      e.preventDefault();
-      navigateBack('index.html');
+  if (currentPage !== 'index.html') {
+    // Logo / any link pointing back to index.html
+    document.querySelectorAll('a[href="index.html"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        navigateBack('index.html');
+      });
     });
+
+    // Android hardware back button (Capacitor)
+    if (window.Capacitor?.Plugins?.App) {
+      window.Capacitor.Plugins.App.addListener('backButton', () => {
+        navigateBack('index.html');
+      });
+    }
+  }
+
+  // r,o,w — the rest is up to you
+  const _seq = ['r','o','w','r','o','w'];
+  let _i = 0;
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    _i = (e.key === _seq[_i]) ? _i + 1 : (e.key === _seq[0] ? 1 : 0);
+    if (_i < _seq.length) return;
+    _i = 0;
+    _gurrenTrigger();
   });
 
-  // Android hardware back button (Capacitor)
-  if (window.Capacitor?.Plugins?.App) {
-    window.Capacitor.Plugins.App.addListener('backButton', () => {
-      navigateBack('index.html');
-    });
-  }
+  // mobile: tap the page footer/logo 6 times quickly
+  let _taps = 0, _tapTimer;
+  document.addEventListener('touchend', e => {
+    if (e.target.closest('input,textarea,button,a')) return;
+    _taps++;
+    clearTimeout(_tapTimer);
+    _tapTimer = setTimeout(() => { _taps = 0; }, 800);
+    if (_taps >= 6) { _taps = 0; _gurrenTrigger(); }
+  }, { passive: true });
+}
+
+function _gurrenTrigger() {
+  // ???%
+  console.groupCollapsed('%c⚡ ROW ROW FIGHT THE POWER ⚡', 'color:#ffd700;font-weight:bold;font-size:15px');
+  console.log('%c"Who the hell do you think I am?!"\n — Kamina, Gurren Lagann', 'color:#f0a500;font-family:monospace');
+  console.log('%c"Don\'t believe in yourself.\n Believe in me — who believes in you."\n — Kamina', 'color:#ccc;font-family:monospace');
+  console.log('%c"At ???%... I surpass my limits."\n — Shigeo Kageyama, Mob Psycho 100', 'color:#9b59b6;font-family:monospace');
+  console.log('%c🌀', 'font-size:48px');
+  console.groupEnd();
+  Toast.show('Row row, fight the power! ⚡', 'success', 4000);
 }
 
 // ── Init ───────────────────────────────────────────────────────
@@ -95,9 +128,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Tracks toevoegen //
-  const TYPE_BADGE = { indoor: 'badge-blue', outdoor: 'badge-green' };
-
   async function renderTracks() {
+    const TYPE_BADGE = { indoor: 'badge-blue', outdoor: 'badge-green' };
     const grid = document.getElementById('tracks-grid');
     try {
       const data = await Tracks.getAll();

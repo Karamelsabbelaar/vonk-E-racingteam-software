@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+   <link rel="stylesheet" href="css/style.css">
+  
   <style>
     :root {
       --bg:#ffffff; --bg2:#ececec; --bg3:#ebebeb; --card:#f8f8f8;
@@ -100,11 +102,14 @@
 </head>
 <body>
 
-  <nav class="navbar">
-    <div class="navbar-inner">
-      <a class="nav-logo" href="#">🏁 KART<span>PIT</span></a>
-    </div>
-  </nav>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="images/Vonk-Logo.png" alt="Vonk">
+    </a>
+      <button id="btn-back" class="btn-nav-back" onclick="window.history.back()" title="Terug">← Back</button>
+  </div>
+</nav>
 
   <div class="login-wrapper">
     <div class="login-card">
@@ -122,7 +127,7 @@
       <form id="loginForm" novalidate>
 
         <div class="form-group">
-          <label class="form-label" for="email">E-mailadres</label>
+          <label class="form-label" for="email">Gebruikersnaam</label>
           <div class="input-wrap">
             <input class="form-input" type="email" id="email" placeholder="naam@kartpit.nl" autocomplete="email" required />
             <span class="input-icon">✉</span>
@@ -163,8 +168,8 @@
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
     // ── CONFIG — vervang met jouw Supabase gegevens ──────────
-    const SUPABASE_URL  = 'https://jouw-project.supabase.co';
-    const SUPABASE_ANON = 'jouw-anon-public-key';
+    const SUPABASE_URL  = 'https://tzzuxemddkgvgipsaadr.supabase.co';
+    const SUPABASE_ANON = 'sb_publishable_hV5vJlRZn0MOwQFErJPbww_9605nepF';
     // ─────────────────────────────────────────────────────────
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);

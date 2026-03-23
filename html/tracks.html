@@ -21,6 +21,10 @@
       <div class="eyebrow">Circuit Database</div>
       <h1>TRACKS</h1>
       <p class="subtitle">Kartcircuits met layout notities en rondtijden</p>
+        <div id="tracktoevoegen">
+          <button onclick="addTrack()" class="btn btn-red">+ Toevoegen</button>
+        </div>
+        <br style="clear:both" />
     </div>
 
     <!-- Track toevoegen -->
@@ -84,6 +88,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.config.js"></script>
+<script src="js/offline.js"></script>
 <script src="js/main.js"></script>
 <script>
   const TYPE_BADGE = { indoor: 'badge-blue', outdoor: 'badge-green' };

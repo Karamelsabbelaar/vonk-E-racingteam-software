@@ -5,14 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KartPit — Home</title>
   <link rel="stylesheet" href="css/style.css">
+
+
 </head>
 <body>
 <div class="wrapper">
 
-  <nav class="navbar">
-    <div class="navbar-inner">
-      <a href="index.html" class="nav-logo"><img src="images/Vonk-Logo.png" alt="Vonk"></a>
-  </nav>
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="images/Vonk-Logo.png" alt="Vonk">
+    </a>
+
+    <button class="btn btn-ghost" onclick='signOut()'>
+      Uitloggen
+    </button>
+
+  </div>
+</nav>
 
   <main class="page-content">
     
@@ -81,6 +91,7 @@
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.config.js"></script>
+<script src="js/offline.js"></script>
 <script src="js/main.js"></script>
 <script>
   const TYPE_BADGE = {
@@ -93,11 +104,13 @@
       const [tracks, pitstops, agenda] = await Promise.all([
         Tracks.getAll(), Pitstops.getAll(), Agenda.getAll()
       ]);
-      document.getElementById('stat-tracks').textContent   = tracks.length;
-      document.getElementById('stat-pitstops').textContent = pitstops.length;
-      document.getElementById('stat-events').textContent   = agenda.length;
+      const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      setEl('stat-tracks',   tracks.length);
+      setEl('stat-pitstops', pitstops.length);
+      setEl('stat-events',   agenda.length);
 
       const tbody = document.getElementById('agenda-preview');
+      if (!tbody) return;
       if (!agenda.length) {
         tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text3);text-align:center;padding:24px">Geen events</td></tr>';
         return;
@@ -109,11 +122,20 @@
           <td><span class="badge ${TYPE_BADGE[item.type] || 'badge-gray'}">${item.type}</span></td>
         </tr>`).join('');
     } catch(e) {
-      Toast.show('Verbindingsfout: controleer je Supabase instellingen', 'error', 6000);
+      console.error('[KartPit] loadHome fout:', e);
+      if (OfflineSync.isNetworkError(e)) {
+        Toast.show('Geen verbinding – data uit cache geladen', 'error', 4000);
+      }
     }
   }
+async function signOut() {
+  await db.auth.signOut();
+  window.location.href = "login.html";
+}
 
   document.addEventListener('DOMContentLoaded', loadHome);
+
 </script>
+
 </body>
 </html>

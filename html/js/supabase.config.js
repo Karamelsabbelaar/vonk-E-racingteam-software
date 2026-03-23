@@ -109,6 +109,7 @@ const Realtime = {
       .subscribe();
   }
 };
+<<<<<<< HEAD
 
 // ── Lap Times ─────────────────────────────────────────────
 const knopje1 = document.getElementById("toevoegknop");
@@ -198,3 +199,10 @@ const LapTimes = {
   }
 };
 });
+=======
+// ── Sign out helper ─────────────────────────────────────────────
+async function signOut() {
+  await db.auth.signOut();
+  window.location.href = "login.html";
+}
+>>>>>>> 141f0524e7a26392fb46e707d7725cd81e98957d
