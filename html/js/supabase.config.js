@@ -109,3 +109,92 @@ const Realtime = {
       .subscribe();
   }
 };
+
+// ── Lap Times ─────────────────────────────────────────────
+const knopje1 = document.getElementById("toevoegknop");
+knopje1.addEventListener('click', () => {
+  driver = Name1;
+  lap_ms = Time;
+  lap_number = Rondes;
+const LapTimes = {
+  async getAll() {
+    const { data, error } = await db.from('tracks').select('*').order('name');
+    if (error) throw error;
+    return data;
+  },
+  async add(driver, lap_number, lap_ms) {
+    const { error } = await db.from('lap_times').insert({ driver, lap_number, lap_ms });
+    if (error) throw error;
+  },
+  async remove(id) {
+    const { error } = await db.from('tracks').delete().eq('id', id);
+    if (error) throw error;
+  }
+};
+});
+
+const knopje2 = document.getElementById("toevoegknop2");
+knopje2.addEventListener('click', () => {
+  driver = Name2;
+  lap_ms = Time;
+  lap_number = RondesB;
+const LapTimes = {
+  async getAll() {
+    const { data, error } = await db.from('tracks').select('*').order('name');
+    if (error) throw error;
+    return data;
+  },
+  async add(driver, lap_number, lap_ms) {
+    const { error } = await db.from('lap_times').insert({ driver, lap_number, lap_ms });
+    if (error) throw error;
+  },
+  async remove(id) {
+    const { error } = await db.from('tracks').delete().eq('id', id);
+    if (error) throw error;
+  }
+};
+});
+
+const knopje3 = document.getElementById("toevoegknop3");
+knopje3.addEventListener('click', () => {
+  driver = Name3;
+  lap_ms = Time;
+  lap_number = RondesC;
+const LapTimes = {
+  async getAll() {
+    const { data, error } = await db.from('tracks').select('*').order('name');
+    if (error) throw error;
+    return data;
+  },
+  async add(driver, lap_number, lap_ms) {
+    const { error } = await db.from('lap_times').insert({ driver, lap_number, lap_ms });
+    if (error) throw error;
+  },
+  async remove(id) {
+    const { error } = await db.from('tracks').delete().eq('id', id);
+    if (error) throw error;
+  }
+};
+});
+
+const knopje4 = document.getElementById("toevoegknop4");
+knopje4.addEventListener('click', () => {
+  driver = Name4;
+  lap_ms = Time;
+  lap_number = RondesD;
+const LapTimes = {
+  async getAll() {
+    const { data, error } = await db.from('tracks').select('*').order('name');
+    if (error) throw error;
+    return data;
+  },
+  async add(driver, lap_number, lap_ms) {
+    const { error } = await db.from('lap_times').insert({ driver, lap_number, lap_ms });
+    if (error) throw error;
+  },
+  async remove(id) {
+    const { error } = await db.from('tracks').delete().eq('id', id);
+    if (error) throw error;
+  }
+};
+});
