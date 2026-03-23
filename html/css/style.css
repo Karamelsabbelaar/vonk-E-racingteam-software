@@ -882,3 +882,23 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   width: 50px;
   text-align: center;
 }
+
+/* ── Offline / Online Sync Banner ───────────────────────────── */
+.sync-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10000;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: .5px;
+  transition: transform .3s ease, opacity .3s ease;
+  pointer-events: none;
+}
+.sync-hidden  { transform: translateY(-100%); opacity: 0; }
+.sync-offline { transform: translateY(0); opacity: 1; background: #c0392b; color: #fff; }
+.sync-online  { transform: translateY(0); opacity: 1; background: #27ae60; color: #fff; }
