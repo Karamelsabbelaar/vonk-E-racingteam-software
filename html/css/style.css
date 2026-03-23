@@ -182,12 +182,15 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   letter-spacing: 2px;
   line-height: 1;
   color: var(--text);
+  width: 50%;
 }
 
 .page-header .subtitle {
   color: var(--text2);
   margin-top: 8px;
   font-size: 15px;
+  width: 50%;
+  float: left;
 }
 
 /* ── Cards ──────────────────────────────────────────────────── */
@@ -284,6 +287,12 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
 
 .btn-sm { padding: 6px 14px; font-size: 11px; }
 .btn-lg { padding: 14px 28px; font-size: 15px; }
+
+#tracktoevoegen .btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  float: right;
+}
 
 /* ── Section Title ──────────────────────────────────────────── */
 .section-header {
