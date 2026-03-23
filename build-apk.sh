@@ -31,39 +31,47 @@ if [ $? -ne 0 ]; then
 fi
 echo "[+] Dependencies installed"
 
-# Sync Capacitor (this copies web assets + generates capacitor.config.json, capacitor.plugins.json, cordova.js)
+# Sync Capacitor (copies web assets and generates config files directly into android/app/src/main/assets)
 echo "[*] Syncing Capacitor..."
-npx cap sync 2>/dev/null
-# The sync copies to android/app/src/main/assets but we build from android/android-template
-# So we copy everything over
-
-# Copy ALL assets from cap sync output to the build directory
-echo "[*] Copying assets to build directory..."
-CAP_ASSETS="$SCRIPT_DIR/android/app/src/main/assets"
-BUILD_ASSETS="$SCRIPT_DIR/android/android-template/app/src/main/assets"
-mkdir -p "$BUILD_ASSETS"
-if [ -d "$CAP_ASSETS" ]; then
-    cp -r "$CAP_ASSETS/"* "$BUILD_ASSETS/"
-    echo "[+] Assets copied from cap sync output"
+npx cap sync android 2>/dev/null
+if [ $? -ne 0 ]; then
+    echo "[-] cap sync android failed, using manual asset copy fallback"
+    mkdir -p "$SCRIPT_DIR/android/app/src/main/assets/public"
+    cp -r "$SCRIPT_DIR/html/"* "$SCRIPT_DIR/android/app/src/main/assets/public/"
+    echo "[+] Assets copied manually"
 else
-    echo "[-] Warning: cap sync output not found, using manual copy"
-    mkdir -p "$BUILD_ASSETS/public"
-    cp -r "$SCRIPT_DIR/html/"* "$BUILD_ASSETS/public/"
+    echo "[+] cap sync complete"
+fi
+
+# Copy icons from repo into Android project
+echo "[*] Copying app icons..."
+ICONS_SRC="$SCRIPT_DIR/icons"
+ICONS_DST="$SCRIPT_DIR/android/app/src/main/res"
+if [ -d "$ICONS_SRC" ]; then
+    for density in mipmap-mdpi mipmap-hdpi mipmap-xhdpi mipmap-xxhdpi mipmap-xxxhdpi mipmap-anydpi-v26; do
+        if [ -d "$ICONS_SRC/$density" ]; then
+            mkdir -p "$ICONS_DST/$density"
+            cp -f "$ICONS_SRC/$density/"* "$ICONS_DST/$density/"
+        fi
+    done
+    echo "[+] Icons copied"
+else
+    echo "[-] Warning: icons/ folder not found, using default icons"
 fi
 
 # Setup Android local properties (Android SDK path)
 echo "[*] Configuring Android SDK..."
-if [ ! -f "android/android-template/local.properties" ]; then
-    echo "sdk.dir=$HOME/Library/Android/sdk" > "android/android-template/local.properties"
+if [ ! -f "android/local.properties" ]; then
+    echo "sdk.dir=$HOME/Library/Android/sdk" > "android/local.properties"
     echo "[+] Android SDK path configured"
 fi
 
-# Navigate to android/android-template
+# Navigate to android/
 echo "[*] Building Android APK..."
-cd "$SCRIPT_DIR/android/android-template"
+cd "$SCRIPT_DIR/android"
 
 if [ ! -f "gradlew" ]; then
-    echo "[-] gradlew not found in android/android-template"
+    echo "[-] gradlew not found in android/"
     exit 1
 fi
 
@@ -80,16 +88,17 @@ fi
 if [ -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
     echo "[+] APK built successfully!"
     
-    # Copy to Desktop
-    echo "[*] Copying APK to Desktop..."
-    cp "app/build/outputs/apk/debug/app-debug.apk" "$HOME/Desktop/app-debug.apk"
-    echo "[+] APK copied to: $HOME/Desktop/app-debug.apk"
+    # Copy to project build/ folder
+    echo "[*] Copying APK to build folder..."
+    mkdir -p "$SCRIPT_DIR/build"
+    cp "app/build/outputs/apk/debug/app-debug.apk" "$SCRIPT_DIR/build/kartpit.apk"
+    echo "[+] APK copied to: $SCRIPT_DIR/build/kartpit.apk"
     echo ""
     echo "====================================="
     echo "   Build Complete!"
     echo "====================================="
     echo ""
-    echo "Next step: Install the APK on your Android device using O+ Connect or ADB"
+    echo "Next step: Install the APK on your Android device using ADB or by manually installing the APK on the device"
 else
     echo "[-] APK file not found after build"
     exit 1

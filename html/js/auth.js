@@ -49,9 +49,3 @@ export async function requireAdmin() {
   }
   return { session, profile };
 }
-
-// ── Sign out ─────────────────────────────────────────────
-export async function signOut() {
-  await supabase.auth.signOut();
-  window.location.href = 'login.html';
-}

@@ -109,3 +109,8 @@ const Realtime = {
       .subscribe();
   }
 };
+// ── Sign out helper ─────────────────────────────────────────────
+async function signOut() {
+  await db.auth.signOut();
+  window.location.href = "login.html";
+}
