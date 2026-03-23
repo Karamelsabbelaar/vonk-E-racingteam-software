@@ -123,6 +123,10 @@
       Toast.show('Verbindingsfout: controleer je Supabase instellingen', 'error', 6000);
     }
   }
+async function signOut() {
+  await db.auth.signOut();
+  window.location.href = "login.html";
+}
 
   document.addEventListener('DOMContentLoaded', loadHome);
 

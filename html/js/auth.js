@@ -20,7 +20,7 @@ export async function getSession() {
 // ── Get profile row (includes role) ─────────────────────
 export async function getProfile(userId) {
   const { data, error } = await supabase
-    .from('profiles')
+    .from('Profiles')
     .select('*')
     .eq('id', userId)
     .single();
