@@ -51,15 +51,16 @@
         </div>
 
         <!-- Categorie: bestaande kiezen of nieuwe typen -->
-        <div class="form-group" style="max-width:200px">
-          <label class="form-label">Categorie</label>
-          <div style="display:flex;gap:6px">
-            <select id="task-cat-select" onchange="syncCatInput(this.value)" style="flex:1;min-width:0">
-              <option value="">— Nieuw —</option>
-            </select>
-            <input type="text" id="task-cat-input" placeholder="Nieuwe categorie" style="flex:1;min-width:0" oninput="syncCatSelect(this.value)" />
-          </div>
-        </div>
+<div class="form-group" style="max-width:320px">
+  <label class="form-label">Categorie</label>
+  <div style="display:flex;gap:6px">
+    <select id="task-cat-select" onchange="syncCatInput(this.value)" style="flex:1;min-width:0">
+      <option value="">— Nieuw —</option>
+    </select>
+    <button onclick="removeSelectedCat()" class="btn btn-ghost btn-sm" title="Verwijder categorie" style="padding:0 8px;opacity:0.6">✕</button>
+    <input type="text" id="task-cat-input" placeholder="Nieuwe categorie" style="flex:1;min-width:0" oninput="syncCatSelect(this.value)" />
+  </div>
+</div>
 
         <div style="display:flex;align-items:flex-end">
           <button onclick="addTask()" class="btn btn-red">+ Toevoegen</button>
@@ -235,6 +236,18 @@ document.addEventListener('DOMContentLoaded', () => {
   renderTasks();
   Realtime.onTasksChange(() => renderTasks());
 });
+
+function removeSelectedCat() {
+  const sel = document.getElementById('task-cat-select');
+  const val = sel.value;
+  if (!val) { Toast.show('Kies eerst een categorie om te verwijderen', 'error'); return; }
+  const opt = [...sel.options].find(o => o.value === val);
+  if (opt) opt.remove();
+  delete catColorMap[val.toLowerCase()];
+  sel.value = '';
+  document.getElementById('task-cat-input').value = '';
+  Toast.show(`Categorie "${val}" verwijderd`, 'success');
+}
 </script>
 </body>
 </html>
