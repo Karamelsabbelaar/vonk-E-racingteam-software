@@ -230,8 +230,8 @@
       const role  = u.app_metadata?.role || 'user';
       const date  = new Date(u.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric' });
       const badge = role === 'admin'
-        ? '<span class="badge badge-red">Admin</span>'
-        : '<span class="badge badge-gray">Gebruiker</span>';
+        ? '<span class="badge badge-pink">Admin</span>'
+        : '<span class="badge badge-blue">Gebruiker</span>';
       return `
         <tr>
           <td style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${name}${isMe ? ' <span class="badge badge-green" style="margin-left:6px;">jij</span>' : ''}</td>

@@ -425,11 +425,12 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   padding: 3px 9px;
   border-radius: 2px;
 }
-.badge-red    { background: var(--red-dim);   color: #ff6680; }
-.badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
-.badge-green  { background: var(--green-dim);  color: var(--green); }
-.badge-blue   { background: rgba(0,144,212,.2); color: var(--blue); }
-.badge-gray   { background: var(--border);     color: var(--text2); }
+.badge-red    { background: var(--red-dim);        color: #ff6680; }
+.badge-yellow { background: var(--yellow-dim);     color: var(--yellow); }
+.badge-green  { background: var(--green-dim);      color: var(--green); }
+.badge-blue   { background: rgba(0,144,212,.15);   color: var(--blue); }
+.badge-gray   { background: var(--border);         color: var(--text2); }
+.badge-pink   { background: rgba(229,0,117,.15);   color: var(--text); }
 
 /* ── Divider ────────────────────────────────────────────────── */
 .divider {
