@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KartPit — Home</title>
   <link rel="stylesheet" href="css/style.css">
+  <script type="module">
+    import { supabase } from './js/auth-guard.js';
+    window.supabase = supabase;
+  </script>
 
 
 </head>

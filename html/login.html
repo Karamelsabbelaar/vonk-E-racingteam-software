@@ -168,7 +168,13 @@
     const SUPABASE_ANON = 'sb_publishable_hV5vJlRZn0MOwQFErJPbww_9605nepF';
     // ─────────────────────────────────────────────────────────
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+      },
+    });
 
     // Redirect if already logged in
     const { data: { session } } = await supabase.auth.getSession();
@@ -239,17 +245,20 @@
         return;
       }
 
-      // Check role in profiles table
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
+      // Verify session was saved
+      const { data: { session: savedSession } } = await supabase.auth.getSession();
+      if (!savedSession) {
+        showAlert('Sessie kon niet worden opgeslagen. Probeer opnieuw.', 'error');
+        return;
+      }
 
       showAlert('Ingelogd! Je wordt doorgestuurd…', 'success');
 
-      setTimeout(() => {
-        if (profile?.role === 'admin') {
+      setTimeout(async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        const role = user?.app_metadata?.role;
+        
+        if (role === 'admin') {
           window.location.href = 'admin.html';
         } else {
           window.location.href = 'index.html';
