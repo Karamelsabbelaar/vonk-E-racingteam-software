@@ -1,10 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KartPit — Taken</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+  .badge-cat-red    { background:#ffd6e0; color:#9e0029; border:1px solid #f0a0b0; font-weight:700; }
+  .badge-cat-orange { background:#fff0d6; color:#8a4000; border:1px solid #f0c878; font-weight:700; }
+  .badge-cat-blue   { background:#d6eaff; color:#003f7a; border:1px solid #90c0f0; font-weight:700; }
+  .badge-cat-green  { background:#d6f5e3; color:#004d25; border:1px solid #80d4a0; font-weight:700; }
+  .badge-cat-purple { background:#edd6ff; color:#3d007a; border:1px solid #c090f0; font-weight:700; }
+
+  .badge-gray { background:#ebebeb; color:#333; border:1px solid #ccc; font-weight:600; }
+
+  .agenda-event { color: #111; font-weight: 600; font-size: 15px; }
+</style>
     <script type="module">
       import { supabase } from './js/auth-guard.js';
       window.supabase = supabase;
@@ -13,22 +25,220 @@
 <body>
 <div class="wrapper">
 
-    <nav class="navbar">
-        <div class="navbar-inner">
-            <a href="index.html" class="nav-logo"><img src="images/Vonk-Logo.png" alt="Vonk"></a>
-    </nav>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="nav-logo"><img src="images/Vonk-Logo.png" alt="Vonk"></a>
+    </div>
+  </nav>
 
-    <main class="page-content">
-            <div class="page-header">
-      <div class="eyebrow">Circuit Database</div>
-      <h1>Takenlijst</h1>
-      <p class="subtitle">Wie moet wat doen.</p>
+  <main class="page-content">
+
+    <div class="page-header">
+      <div class="eyebrow">Kart Day</div>
+      <h1>TAKENLIJST</h1>
+      <p class="subtitle">Wijs taken toe aan teamleden</p>
     </div>
 
+    <!-- Taak toevoegen -->
+    <div class="card" style="margin-bottom:40px">
+      <h3 class="section-title" style="margin-bottom:16px">Taak Toevoegen</h3>
+      <div class="form-row">
 
-    </main>
-    
-</body>
-<script src="js/main.js"></script>
+        <div class="form-group">
+          <label class="form-label">Omschrijving</label>
+          <input type="text" id="task-desc" placeholder="bijv. Banden controleren" />
+        </div>
+
+        <div class="form-group" style="max-width:180px">
+          <label class="form-label">Toegewezen aan</label>
+          <input type="text" id="task-person" placeholder="bijv. Rik" />
+        </div>
+
+        <!-- Categorie: bestaande kiezen of nieuwe typen -->
+        <div class="form-group" style="max-width:200px">
+          <label class="form-label">Categorie</label>
+          <div style="display:flex;gap:6px">
+            <select id="task-cat-select" onchange="syncCatInput(this.value)" style="flex:1;min-width:0">
+              <option value="">— Nieuw —</option>
+            </select>
+            <input type="text" id="task-cat-input" placeholder="Nieuwe categorie" style="flex:1;min-width:0" oninput="syncCatSelect(this.value)" />
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:flex-end">
+          <button onclick="addTask()" class="btn btn-red">+ Toevoegen</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h2 class="section-title">Taakoverzicht</h2>
+      <span id="live-badge" class="badge badge-green" style="animation:pulse 2s infinite">● LIVE</span>
+    </div>
+
+    <div class="agenda-list" id="task-list">
+      <p style="color:var(--text3);text-align:center;padding:40px 0">Laden…</p>
+    </div>
+
+  </main>
+
+  <footer class="footer">KartPit &mdash; Amateur Karting Race Manager &mdash; 🏎️</footer>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.config.js"></script>
+<script src="js/offline.js"></script>
+<script src="js/main.js"></script>
+<script>
+
+  /* ── Categorie kleurenpalet (automatisch toegewezen) ── */
+const CAT_PALETTE = [
+  { dot: '#e8003d', badge: 'badge-cat-red'    },
+  { dot: '#e87500', badge: 'badge-cat-orange' },
+  { dot: '#0077cc', badge: 'badge-cat-blue'   },
+  { dot: '#007a3d', badge: 'badge-cat-green'  },
+  { dot: '#6600cc', badge: 'badge-cat-purple' },
+];
+  const catColorMap = {};
+  let catColorIndex = 0;
+
+  function colorForCat(cat) {
+    const key = (cat || '').toLowerCase();
+    if (!catColorMap[key]) {
+      catColorMap[key] = CAT_PALETTE[catColorIndex % CAT_PALETTE.length];
+      catColorIndex++;
+    }
+    return catColorMap[key];
+  }
+
+  /* ── Categorie dropdown synchronisatie ── */
+  function syncCatInput(val) {
+    if (val) document.getElementById('task-cat-input').value = val;
+  }
+  function syncCatSelect(val) {
+    const sel = document.getElementById('task-cat-select');
+    // Zoek of de waarde al bestaat in de dropdown
+    const found = [...sel.options].find(o => o.value.toLowerCase() === val.toLowerCase());
+    sel.value = found ? found.value : '';
+  }
+
+  function updateCatDropdown(tasks) {
+    const sel = document.getElementById('task-cat-select');
+    const existing = new Set([...sel.options].map(o => o.value));
+    const cats = [...new Set(tasks.map(t => t.category).filter(Boolean))];
+    cats.forEach(cat => {
+      if (!existing.has(cat)) {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        sel.appendChild(opt);
+      }
+    });
+  }
+
+  /* ── Render ── */
+  async function renderTasks() {
+    const list = document.getElementById('task-list');
+    try {
+      const data = await Tasks.getAll();       // zie main.js
+      updateCatDropdown(data);
+
+      if (!data.length) {
+        list.innerHTML = '<p style="color:var(--text3);text-align:center;padding:40px 0">Nog geen taken — voeg er een toe.</p>';
+        return;
+      }
+
+      // Groepeer op categorie
+      const grouped = {};
+      data.forEach(t => {
+        const cat = t.category || 'Overig';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(t);
+      });
+
+      list.innerHTML = Object.entries(grouped).map(([cat, items]) => {
+        const c = colorForCat(cat);
+        const rows = items.map((t, i) => `
+          <div class="agenda-row" data-id="${t.id}" style="${t.done ? 'opacity:0.45' : ''}">
+            <div class="agenda-time-col">
+              <button onclick="toggleDone(${t.id}, ${!t.done})" class="btn btn-ghost btn-sm"
+                style="font-size:18px;padding:0 4px;opacity:${t.done ? '1' : '0.35'}">
+                ${t.done ? '✓' : '○'}
+              </button>
+            </div>
+            <div class="agenda-dot-col">
+              <div class="agenda-dot" style="background:${c.dot}"></div>
+              ${i < items.length - 1 ? '<div class="agenda-line"></div>' : ''}
+            </div>
+            <div class="agenda-content">
+              <div class="agenda-event" style="${t.done ? 'text-decoration:line-through' : ''}">${t.description}</div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px">
+                ${t.assigned_to ? `<span class="badge badge-gray">👤 ${t.assigned_to}</span>` : ''}
+                <button onclick="deleteTask(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.4">✕</button>
+              </div>
+            </div>
+          </div>`).join('');
+
+        return `
+          <div style="margin-bottom:24px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding-left:4px">
+              <span class="badge ${c.badge}">${cat}</span>
+              <span style="color:var(--text3);font-size:12px">${items.filter(t=>t.done).length}/${items.length} klaar</span>
+            </div>
+            ${rows}
+          </div>`;
+      }).join('');
+
+    } catch(e) {
+      list.innerHTML = `<p style="color:var(--red)">Fout: ${e.message}</p>`;
+    }
+  }
+
+  /* ── Acties ── */
+  async function addTask() {
+    const desc    = document.getElementById('task-desc').value.trim();
+    const person  = document.getElementById('task-person').value.trim();
+    const cat     = document.getElementById('task-cat-input').value.trim()
+                 || document.getElementById('task-cat-select').value
+                 || 'Overig';
+
+    if (!desc) { Toast.show('Vul een omschrijving in', 'error'); return; }
+
+    try {
+      await Tasks.add(desc, person, cat);
+      document.getElementById('task-desc').value    = '';
+      document.getElementById('task-person').value  = '';
+      // Laat categorie staan voor snel doorvoeren
+      Toast.show('Taak toegevoegd', 'success');
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
+  }
+
+  async function deleteTask(id) {
+    try {
+      await Tasks.remove(id);
+      Toast.show('Taak verwijderd', 'success');
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
+  }
+
+  async function toggleDone(id, done) {
+    try {
+      await Tasks.setDone(id, done);
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
+  }
+
+  /* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderTasks();
+  Realtime.onTasksChange(() => renderTasks());
+});
+</script>
+</body>
 </html>
