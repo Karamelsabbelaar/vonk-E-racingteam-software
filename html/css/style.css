@@ -102,10 +102,17 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   from { opacity: 1; transform: translateX(0); }
   to   { opacity: 0; transform: translateX(16px); }
 }
+@keyframes checker-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: 40px 40px; }
+}
 
 /* ── Layout ─────────────────────────────────────────────────── */
-.wrapper { display: flex; flex-direction: column; min-height: 100vh; animation: page-enter .13s ease both; }
+.wrapper { display: flex; flex-direction: column; min-height: 100vh; animation: page-enter .13s ease both; position: relative; }
 .wrapper.exiting { animation: page-exit .10s ease both; }
+.wrapper::before { content: ''; position: absolute; inset: 0; background: repeating-conic-gradient(rgba(0,0,0,.008) 0% 25%, transparent 0% 50%) 0 0/60px 60px; animation: checker-scroll 8s linear infinite; pointer-events: none; z-index: 0; }
+[data-theme="dark"] .wrapper::before { background: repeating-conic-gradient(rgba(255,255,255,.004) 0% 25%, transparent 0% 50%) 0 0/60px 60px; }
+.wrapper > * { position: relative; z-index: 1; }
 
 /* Full-screen home layout */
 .home-page { height: 100dvh; overflow: hidden; }
@@ -347,6 +354,24 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
 .btn-red:hover {
   background: #bc831a;
   box-shadow: 0 0 20px var(--red-glow);
+}
+
+.btn-blue {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+.btn-blue:hover {
+  background: #005fa3;
+  box-shadow: 0 0 20px rgba(0,144,212,0.4);
+}
+[data-theme="dark"] .btn-blue {
+  background: var(--blue);
+  color: #fff;
+}
+[data-theme="dark"] .btn-blue:hover {
+  background: #005fa3;
+  box-shadow: 0 0 20px rgba(0,144,212,0.4);
 }
 
 .btn-outline {
@@ -1012,6 +1037,61 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   .footer .theme-toggle:hover { transform: scale(1.1); }
   
   #btn-play-pause { width: 100%; }
+}
+
+/* ── WFHD Ultrawide (2560x1080) ──────────────────────────── */
+@media (min-width: 2560px) and (max-width: 3439px) {
+  .wrapper { max-width: 2400px; margin: 0 auto; }
+  .page-content { max-width: 2400px; margin: 0 auto; padding: 0 40px 60px; }
+  .navbar-inner { max-width: 2400px; margin: 0 auto; }
+  .hero { max-width: 2400px; margin: 0 auto; }
+  .hero-grid { grid-template-columns: 1fr 1fr; }
+  .hero-text h1 { font-size: 96px; }
+  .kart-grid { grid-template-columns: repeat(4, 1fr); }
+  .tracks-grid { grid-template-columns: repeat(4, 1fr); }
+  .quicknav-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── WQHD Ultrawide (3440x1440) ──────────────────────────── */
+@media (min-width: 3440px) and (max-width: 3839px) {
+  .wrapper { max-width: 3200px; margin: 0 auto; }
+  .page-content { max-width: 3200px; margin: 0 auto; padding: 0 60px 60px; }
+  .navbar-inner { max-width: 3200px; margin: 0 auto; }
+  .hero { max-width: 3200px; margin: 0 auto; }
+  .hero-grid { grid-template-columns: 1fr 1fr; }
+  .hero-text h1 { font-size: 104px; }
+  .kart-grid { grid-template-columns: repeat(5, 1fr); gap: 28px; }
+  .tracks-grid { grid-template-columns: repeat(5, 1fr); gap: 28px; }
+  .quicknav-grid { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* ── UWQHD+ Ultrawide (3840x1600+) ───────────────────────── */
+@media (min-width: 3840px) and (max-width: 5119px) {
+  .wrapper { max-width: 3600px; margin: 0 auto; }
+  .page-content { max-width: 3600px; margin: 0 auto; padding: 0 60px 60px; }
+  .navbar-inner { max-width: 3600px; margin: 0 auto; }
+  .hero { max-width: 3600px; margin: 0 auto; }
+  .hero-grid { grid-template-columns: 1fr 1fr; }
+  .hero-text h1 { font-size: 108px; }
+  .kart-grid { grid-template-columns: repeat(6, 1fr); gap: 32px; }
+  .tracks-grid { grid-template-columns: repeat(6, 1fr); gap: 32px; }
+  .quicknav-grid { grid-template-columns: repeat(6, 1fr); }
+  .card { padding: 24px; }
+}
+
+/* ── 5K Ultrawide (5120x2160+) ───────────────────────────── */
+@media (min-width: 5120px) {
+  .wrapper { max-width: 4800px; margin: 0 auto; }
+  .page-content { max-width: 4800px; margin: 0 auto; padding: 0 80px 80px; }
+  .navbar-inner { max-width: 4800px; margin: 0 auto; }
+  .hero { max-width: 4800px; margin: 0 auto; }
+  .hero-grid { grid-template-columns: 1fr 1fr; gap: 80px; }
+  .hero-text h1 { font-size: 120px; }
+  .kart-grid { grid-template-columns: repeat(8, 1fr); gap: 40px; }
+  .tracks-grid { grid-template-columns: repeat(8, 1fr); gap: 40px; }
+  .quicknav-grid { grid-template-columns: repeat(8, 1fr); gap: 20px; }
+  .card { padding: 32px; }
+  .page-header h1 { font-size: 64px; }
 }
 
 .time-input {
