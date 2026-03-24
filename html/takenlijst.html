@@ -17,6 +17,10 @@
 
   .agenda-event { color: #111; font-weight: 600; font-size: 15px; }
 </style>
+    <script type="module">
+      import { supabase } from './js/auth-guard.js';
+      window.supabase = supabase;
+    </script>
 </head>
 <body>
 <div class="wrapper">
