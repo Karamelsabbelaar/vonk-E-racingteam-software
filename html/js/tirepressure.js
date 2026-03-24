@@ -73,10 +73,10 @@ async function renderTirePressureHistory() {
               <td style="font-size:13px;color:var(--text3)">
                 ${new Date(row.created_at).toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'short' })}
               </td>
-              <td style="font-family:var(--font-display);font-size:20px">${row.Links_voor ?? '–'}</td>
-              <td style="font-family:var(--font-display);font-size:20px">${row.Rechts_voor ?? '–'}</td>
-              <td style="font-family:var(--font-display);font-size:20px">${row.Links_achter ?? '–'}</td>
-              <td style="font-family:var(--font-display);font-size:20px">${row.Rechts_achter ?? '–'}</td>
+              <td style="font-family:var(--font-display);font-size:20px">${row.links_voor ?? '–'}</td>
+              <td style="font-family:var(--font-display);font-size:20px">${row.rechts_voor ?? '–'}</td>
+              <td style="font-family:var(--font-display);font-size:20px">${row.links_achter ?? '–'}</td>
+              <td style="font-family:var(--font-display);font-size:20px">${row.rechts_achter ?? '–'}</td>
               <td>
                 <button onclick="deleteTirePressure(${row.id})"
                         class="btn btn-ghost btn-sm" style="opacity:0.4">✕</button>
@@ -108,3 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTirePressureHistory();
   }
 });
+
+
+// Opslaan mislukt: Could not find the 'Links_achter' column of 'tire_pressures' in the schema cache

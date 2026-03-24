@@ -112,10 +112,10 @@ const TirePressures = {
     const { error } = await db.from('tire_pressures').insert({
       track_id:      trackId,
       pitstop_id:    pitstopId,
-      Links_voor:    lv,
-      Rechts_voor:   rv,
-      Links_achter:  la,
-      Rechts_achter: ra
+      links_voor:    lv,
+      rechts_voor:   rv,
+      links_achter:  la,
+      rechts_achter: ra
     });
     if (error) throw error;
   },
