@@ -24,6 +24,27 @@ const Toast = {
   }
 };
 
+// ── Taken ─────────────────────────────────────────────────────
+const Tasks = {
+  async getAll() {
+    const { data, error } = await db.from('tasks').select('*').order('created_at');
+    if (error) throw error;
+    return data;
+  },
+  async add(description, assigned_to, category) {
+    const { error } = await db.from('tasks').insert({ description, assigned_to, category, done: false });
+    if (error) throw error;
+  },
+  async remove(id) {
+    const { error } = await db.from('tasks').delete().eq('id', id);
+    if (error) throw error;
+  },
+  async setDone(id, done) {
+    const { error } = await db.from('tasks').update({ done }).eq('id', id);
+    if (error) throw error;
+  }
+};
+
 // ── Modal ──────────────────────────────────────────────────────
 const Modal = {
   open(id)  { document.getElementById(id)?.classList.add('open'); },
@@ -115,8 +136,82 @@ function _gurrenTrigger() {
   Toast.show('Row row, fight the power! ⚡', 'success', 4000);
 }
 
+// ── Dark Mode ──────────────────────────────────────────────────
+function initTheme() {
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  _updateThemeBtn(saved);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  document.querySelectorAll('.theme-toggle').forEach(btn => {
+    btn.classList.add('spinning');
+    setTimeout(() => btn.classList.remove('spinning'), 500);
+  });
+  _updateThemeBtn(next);
+}
+
+function _updateThemeBtn(theme) {
+  const sun = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+  const moon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  const icon  = theme === 'dark' ? sun : moon;
+  const title = theme === 'dark' ? 'Licht thema' : 'Donker thema';
+  document.querySelectorAll('.theme-toggle').forEach(btn => {
+    btn.title = title;
+    const labelEl = btn.querySelector('.theme-label');
+    if (labelEl) {
+      // Sidebar button has SVG + label span — replace only the SVG, keep the label
+      const oldSvg = btn.querySelector('svg');
+      if (oldSvg) { oldSvg.insertAdjacentHTML('afterend', icon); oldSvg.remove(); }
+      labelEl.textContent = title;
+    } else {
+      btn.innerHTML = icon;
+    }
+  });
+}
+
+// ── Hamburger Menu ─────────────────────────────────────────────
+function initHamburgerMenu() {
+  const btn      = document.getElementById('hamburgerBtn');
+  const menu     = document.getElementById('sideMenu');
+  const backdrop = document.getElementById('menuBackdrop');
+  if (!btn || !menu || !backdrop) return;
+  const open = () => {
+    btn.classList.add('open');
+    menu.classList.add('open');
+    backdrop.classList.add('open');
+    menu.setAttribute('aria-hidden', 'false');
+    btn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  };
+  const close = () => {
+    btn.classList.remove('open');
+    menu.classList.remove('open');
+    backdrop.classList.remove('open');
+    menu.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  };
+  btn.addEventListener('click', () => btn.classList.contains('open') ? close() : open());
+  backdrop.addEventListener('click', close);
+  document.getElementById('menuClose')?.addEventListener('click', close);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+}
+
+// ── Global Sign Out ─────────────────────────────────────────────
+async function signOutGlobal() {
+  try { if (typeof db !== 'undefined') await db.auth.signOut(); } catch(_) {}
+  window.location.href = 'login.html';
+}
+
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  initHamburgerMenu();
   Modal.init();
   setActiveNav();
   initBackTransition();
