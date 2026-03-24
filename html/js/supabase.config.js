@@ -107,7 +107,13 @@ const Realtime = {
     db.channel('pitstops')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pitstops' }, callback)
       .subscribe();
-  }
+  },
+
+  onTasksChange(callback) {
+  db.channel('tasks')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, callback)
+    .subscribe();
+}
 };
 
 // ── Lap Times ─────────────────────────────────────────────

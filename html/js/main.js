@@ -24,6 +24,27 @@ const Toast = {
   }
 };
 
+// ── Taken ─────────────────────────────────────────────────────
+const Tasks = {
+  async getAll() {
+    const { data, error } = await db.from('tasks').select('*').order('created_at');
+    if (error) throw error;
+    return data;
+  },
+  async add(description, assigned_to, category) {
+    const { error } = await db.from('tasks').insert({ description, assigned_to, category, done: false });
+    if (error) throw error;
+  },
+  async remove(id) {
+    const { error } = await db.from('tasks').delete().eq('id', id);
+    if (error) throw error;
+  },
+  async setDone(id, done) {
+    const { error } = await db.from('tasks').update({ done }).eq('id', id);
+    if (error) throw error;
+  }
+};
+
 // ── Modal ──────────────────────────────────────────────────────
 const Modal = {
   open(id)  { document.getElementById(id)?.classList.add('open'); },
