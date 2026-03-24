@@ -19,15 +19,10 @@
     <div class="page-header">
       <div class="eyebrow">Race Tools</div>
       <h1>PITSTOP TIMER</h1>
-      <p class="subtitle">Meet & log je pitstop tijden</p>
     </div>
 
     <div class="card" style="text-align:center;margin-bottom:24px">
       <div id="timer-display" class="timer-display">00:00.00</div>
-      <div style="display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:24px">
-        <label class="form-label" for="target-time">Doeltijd (sec):</label>
-        <input type="number" id="target-time" placeholder="bijv. 8" step="0.1" min="0" style="width:120px;text-align:center" />
-      </div>
       <div class="timer-controls">
         <div class="play-pause-container">
           <button id="btn-start" class="btn btn-red btn-lg btn-play-pause">▶ START</button>
@@ -36,6 +31,30 @@
         <button id="btn-reset" class="btn btn-outline btn-lg">↺ RESET</button>
         <button id="btn-save"  class="btn btn-outline btn-lg" disabled>💾 OPSLAAN</button>
       </div>
+        <div id="banden-spanning" style="margin-top:20px">
+          <div class="form-label" style="margin-bottom:12px">Bandenspanning (bar):</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:360px;margin:0 auto">
+            <div>
+              <label class="form-label" for="tp-lv">Linksvoor</label>
+              <input type="number" id="tp-lv" placeholder="1.8" step="0.1" min="0" style="width:100%;margin-top:4px"/>
+            </div>
+            <div>
+              <label class="form-label" for="tp-rv">Rechtsvoor</label>
+              <input type="number" id="tp-rv" placeholder="1.8" step="0.1" min="0" style="width:100%;margin-top:4px"/>
+            </div>
+            <div>
+              <label class="form-label" for="tp-la">Linksachter</label>
+              <input type="number" id="tp-la" placeholder="1.8" step="0.1" min="0" style="width:100%;margin-top:4px"/>
+            </div>
+            <div>
+              <label class="form-label" for="tp-ra">Rechtsachter</label>
+              <input type="number" id="tp-ra" placeholder="1.8" step="0.1" min="0" style="width:100%;margin-top:4px"/>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <button onclick="saveTirePressure()" class="btn btn-outline btn-sm">💾 Spanning Opslaan</button>
+          </div>
+        </div>
     </div>
 
     <div class="stat-grid" style="margin-bottom:32px">
@@ -63,10 +82,20 @@
     </div>
     <div id="stop-history" class="timer-history"></div>
 
+    <!-- Bandenspanning history -->
+    <div class="section-header" style="margin-top:32px">
+      <h2 class="section-title">🏎️ Bandenspanning History</h2>
+    </div>
+    <div class="card" style="padding:24px">
+      <div id="tire-pressure-history">
+        <p style="color:var(--text3);text-align:center;padding:16px 0">Nog geen metingen opgeslagen</p>
+      </div>
+    </div>
+
     <!-- Save Modal -->
     <div id="save-modal" class="modal-overlay">
       <div class="modal">
-        <div class="modal-title">💾 Stop Opslaan</div>
+        <div class="modal-title">💾 Tijd Opslaan</div>
         <div class="form-group" style="margin-bottom:16px">
           <label class="form-label">Label</label>
           <input type="text" id="stop-label" placeholder="bijv. Race 1 – Ronde 8 stop" />
@@ -84,16 +113,15 @@
 
   </main>
 
-  <footer class="footer">KartPit &mdash; Amateur Karting Race Manager &mdash; 🏎️</footer>
+  <footer class="footer">&mdash; Amateur Karting Race Manager &mdash; 🏎️</footer>
 </div>
 
 <div id="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@capacitor/core@latest/dist/capacitor.js"></script>
 <script src="js/supabase.config.js"></script>
-<script src="js/notifications.js"></script>
 <script src="js/main.js"></script>
 <script src="js/timer.js"></script>
+<script src="js/tirepressure.js"></script>
 </body>
 </html>

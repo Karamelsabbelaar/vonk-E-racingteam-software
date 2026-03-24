@@ -16,9 +16,11 @@ let MS2 = 0;
 let MM1 = 0;
 let SS1 = 0;
 let MS1 = 0;
+let Name1 = "";
+let Time = 0;
 
 Klik.addEventListener('click', () => {
-    let Name1 = document.forms["Name1"]["nameInput1"].value;
+    Name1 = document.forms["Name1"]["nameInput1"].value;
 
     const EName1 = document.getElementById("Name1");
     EName1.remove();
