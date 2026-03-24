@@ -12,22 +12,17 @@ async function saveTirePressure() {
   const la = get('tp-la');
   const ra = get('tp-ra');
 
-  // Validatie — alle vier moeten ingevuld zijn
   if ([lv, rv, la, ra].some(v => isNaN(v) || v <= 0)) {
     Toast.show('Vul alle vier de bandspanningen in (in bar)', 'error');
     return;
   }
 
-  // Haal de track_id op van de volgende/huidige race
   let trackId = null;
   try {
-    const track = await Tracks.getNext();
+    const track = await Tracks.getNext?.();
     if (track) trackId = track.id;
-  } catch(e) {
-    // geen track gevonden, slaan we op zonder track_id
-  }
+  } catch(e) {}
 
-  // pitstop_id = meest recent opgeslagen pitstop
   let pitstopId = null;
   try {
     const stops = await Pitstops.getAll();
@@ -37,15 +32,11 @@ async function saveTirePressure() {
   try {
     await TirePressures.add(trackId, pitstopId, lv, rv, la, ra);
     Toast.show('Bandenspanning opgeslagen ✓', 'success');
-
-    // Velden leegmaken
     ['tp-lv', 'tp-rv', 'tp-la', 'tp-ra'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
-
     await renderTirePressureHistory();
-
   } catch(e) {
     Toast.show('Opslaan mislukt: ' + e.message, 'error');
   }

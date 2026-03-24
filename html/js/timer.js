@@ -6,14 +6,13 @@
 const PitTimer = (() => {
   let startTime = null, elapsed = 0, running = false, rafId = null, targetMs = null;
 
-  const display  = () => document.getElementById('timer-display');
-  const startBtn = () => document.getElementById('btn-start');
-  const stopBtn  = () => document.getElementById('btn-stop');
-  const saveBtn  = () => document.getElementById('btn-save');
+  const display = () => document.getElementById('timer-display');
+  const ppBtn   = () => document.getElementById('btn-play-pause');
+  const saveBtn = () => document.getElementById('btn-save');
 
-  function tick() {
+  function tick(ts) {
     if (!running) return;
-    elapsed = Date.now() - startTime;
+    elapsed = ts - startTime;
     render(elapsed);
     const t = targetMs;
     if (t) {
@@ -35,12 +34,14 @@ const PitTimer = (() => {
 
   function start() {
     if (running) return;
-    running   = true;
-    startTime = Date.now() - elapsed;
-    targetMs  = (parseFloat(document.getElementById('target-time')?.value) * 1000) || null;
-    startBtn().disabled = true;
-    stopBtn().disabled  = false;
-    rafId = requestAnimationFrame(tick);
+    running  = true;
+    targetMs = (parseFloat(document.getElementById('target-time')?.value) * 1000) || null;
+    const btn = ppBtn();
+    btn.classList.add('running');
+    btn.querySelector('.pp-label').textContent = 'STOP';
+    // Use RAF timestamp as time source — same epoch as tick(ts), sub-ms precision
+    const offset = elapsed;
+    rafId = requestAnimationFrame(ts => { startTime = ts - offset; rafId = requestAnimationFrame(tick); });
   }
 
   function stop() {
@@ -48,17 +49,29 @@ const PitTimer = (() => {
     running = false;
     cancelAnimationFrame(rafId);
     display().className = 'timer-display stopped';
-    startBtn().disabled = false;
-    stopBtn().disabled  = true;
-    saveBtn().disabled  = false;
+    const btn = ppBtn();
+    btn.classList.remove('running');
+    btn.querySelector('.pp-label').textContent = 'START';
+    saveBtn().disabled = false;
+  }
+
+  function toggle() {
+    const btn = ppBtn();
+    btn.classList.add('pressing');
+    setTimeout(() => btn.classList.remove('pressing'), 320);
+    if (!running) { start(); } else { stop(); }
   }
 
   function reset() {
-    stop();
+    running = false;
+    cancelAnimationFrame(rafId);
     elapsed = 0;
     render(0);
     display().className = 'timer-display';
-    saveBtn().disabled  = true;
+    const btn = ppBtn();
+    btn.classList.remove('running');
+    btn.querySelector('.pp-label').textContent = 'START';
+    saveBtn().disabled = true;
   }
 
   async function saveStop() {
@@ -106,7 +119,9 @@ const PitTimer = (() => {
           ${stop.notes ? `<br><span style="font-size:13px;color:var(--text3)">${stop.notes}</span>` : ''}
         </div>
         <div class="stop-date">${date}</div>
-        <button class="btn btn-ghost btn-sm" onclick="PitTimer.del(${stop.id})">✕</button>
+        <button class="btn btn-ghost btn-sm" onclick="PitTimer.del(${stop.id})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>`;
   }
 
@@ -135,22 +150,20 @@ const PitTimer = (() => {
     }
   }
 
-  return { start, stop, reset, save: saveStop, del: deleteStop, load: loadHistory };
+  return { toggle, start, stop, reset, save: saveStop, del: deleteStop, load: loadHistory };
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btn-start')?.addEventListener('click', PitTimer.start);
-  document.getElementById('btn-stop')?.addEventListener('click',  PitTimer.stop);
+  document.getElementById('btn-play-pause')?.addEventListener('click', PitTimer.toggle);
   document.getElementById('btn-reset')?.addEventListener('click', PitTimer.reset);
   document.getElementById('btn-save')?.addEventListener('click',  () => Modal.open('save-modal'));
   document.getElementById('btn-confirm-save')?.addEventListener('click', PitTimer.save);
 
-  // Realtime: als een teamlid een stop opslaat, ziet iedereen het meteen
   Realtime.onPitstopChange(() => PitTimer.load());
 
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    if (e.code === 'Space') { e.preventDefault(); document.getElementById('btn-start').disabled ? PitTimer.stop() : PitTimer.start(); }
+    if (e.code === 'Space') { e.preventDefault(); PitTimer.toggle(); }
     if (e.code === 'KeyR')  PitTimer.reset();
   });
 

@@ -74,6 +74,23 @@ const Pitstops = {
   }
 };
 
+// ── Tracks ────────────────────────────────────────────────────
+const Tracks = {
+  async getAll() {
+    const { data, error } = await db.from('tracks').select('*').order('name');
+    if (error) throw error;
+    return data;
+  },
+  async add(track) {
+    const { error } = await db.from('tracks').insert(track);
+    if (error) throw error;
+  },
+  async remove(id) {
+    const { error } = await db.from('tracks').delete().eq('id', id);
+    if (error) throw error;
+  }
+};
+
 // ── Bandenspanning ─────────────────────────────────────────────
 const TirePressures = {
   async getAll() {
@@ -108,24 +125,6 @@ const TirePressures = {
   }
 };
 
-
-// ── Tracks ────────────────────────────────────────────────────
-const Tracks = {
-  async getAll() {
-    const { data, error } = await db.from('tracks').select('*').order('name');
-    if (error) throw error;
-    return data;
-  },
-  async add(track) {
-    const { error } = await db.from('tracks').insert(track);
-    if (error) throw error;
-  },
-  async remove(id) {
-    const { error } = await db.from('tracks').delete().eq('id', id);
-    if (error) throw error;
-  }
-};
-
 // ── Realtime helper (live updates voor teamleden) ──────────────
 const Realtime = {
   onChecklistChange(callback) {
@@ -143,39 +142,18 @@ const Realtime = {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pitstops' }, callback)
       .subscribe();
   },
-
   onTasksChange(callback) {
-  db.channel('tasks')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, callback)
-    .subscribe();
-}
+    db.channel('tasks')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, callback)
+      .subscribe();
+  }
 };
 
 // ── Lap Times ─────────────────────────────────────────────
-const knopje1 = document.getElementById("toevoegknop");
-async function addItem() {
-  
-}
-knopje1.addEventListener('click', () => {
-  driver = Name1;
-  lap_ms = Time;
-  lap_number = Rondes;
-  console.log("Driver:", driver);
-  console.log("Lap number:", lap_number);
-  console.log("Lap time (ms):", lap_ms);
-  addLapTime();
-
-});
-async function addLapTime() {
-   try {
-    await LapTimes.add(driver, lap_number, lap_ms);
-  } catch(e) {
-  }
-}
-
+// WIP: these buttons only exist on rondetijd.html — guard against null on other pages
 const LapTimes = {
   async getAll() {
-    const { data, error } = await db.from('tracks').select('*').order('name');
+    const { data, error } = await db.from('lap_times').select('*').order('lap_number');
     if (error) throw error;
     return data;
   },
@@ -184,75 +162,33 @@ const LapTimes = {
     if (error) throw error;
   },
   async remove(id) {
-    const { error } = await db.from('tracks').delete().eq('id', id);
+    const { error } = await db.from('lap_times').delete().eq('id', id);
     if (error) throw error;
   }
 };
+
+const knopje1 = document.getElementById("toevoegknop");
+if (knopje1) knopje1.addEventListener('click', () => {
+  const driver = Name1, lap_ms = Time, lap_number = Rondes;
+  LapTimes.add(driver, lap_number, lap_ms);
+});
 
 const knopje2 = document.getElementById("toevoegknop2");
-knopje2.addEventListener('click', () => {
-  driver = Name2;
-  lap_ms = Time;
-  lap_number = RondesB;
-const LapTimes = {
-  async getAll() {
-    const { data, error } = await db.from('tracks').select('*').order('name');
-    if (error) throw error;
-    return data;
-  },
-  async add(driver, lap_number, lap_ms) {
-    const { error } = await db.from('lap_times').insert({ driver, lap_number, lap_ms });
-    if (error) throw error;
-  },
-  async remove(id) {
-    const { error } = await db.from('tracks').delete().eq('id', id);
-    if (error) throw error;
-  }
-};
+if (knopje2) knopje2.addEventListener('click', () => {
+  const driver = Name2, lap_ms = Time, lap_number = RondesB;
+  LapTimes.add(driver, lap_number, lap_ms);
 });
 
 const knopje3 = document.getElementById("toevoegknop3");
-knopje3.addEventListener('click', () => {
-  driver = Name3;
-  lap_ms = Time;
-  lap_number = RondesC;
-const LapTimes = {
-  async getAll() {
-    const { data, error } = await db.from('tracks').select('*').order('name');
-    if (error) throw error;
-    return data;
-  },
-  async add(driver, lap_number, lap_ms) {
-    const { error } = await db.from('lap_times').insert({ driver, lap_number, lap_ms });
-    if (error) throw error;
-  },
-  async remove(id) {
-    const { error } = await db.from('tracks').delete().eq('id', id);
-    if (error) throw error;
-  }
-};
+if (knopje3) knopje3.addEventListener('click', () => {
+  const driver = Name3, lap_ms = Time, lap_number = RondesC;
+  LapTimes.add(driver, lap_number, lap_ms);
 });
 
 const knopje4 = document.getElementById("toevoegknop4");
-knopje4.addEventListener('click', () => {
-  driver = Name4;
-  lap_ms = Time;
-  lap_number = RondesD;
-const LapTimes = {
-  async getAll() {
-    const { data, error } = await db.from('tracks').select('*').order('name');
-    if (error) throw error;
-    return data;
-  },
-  async add(driver, lap_number, lap_ms) {
-    const { error } = await db.from('lap_times').insert({ driver, lap_number, lap_ms });
-    if (error) throw error;
-  },
-  async remove(id) {
-    const { error } = await db.from('tracks').delete().eq('id', id);
-    if (error) throw error;
-  }
-};
+if (knopje4) knopje4.addEventListener('click', () => {
+  const driver = Name4, lap_ms = Time, lap_number = RondesD;
+  LapTimes.add(driver, lap_number, lap_ms);
 });
 // ── Sign out helper ─────────────────────────────────────────────
 async function signOut() {
