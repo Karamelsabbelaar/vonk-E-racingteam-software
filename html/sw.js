@@ -3,7 +3,7 @@
  * Cache-first for all static assets, network-only for Supabase API.
  */
 
-const CACHE = 'kartpit-v1';
+const CACHE = 'kartpit-v2';
 
 const STATIC = [
   './',
@@ -29,9 +29,18 @@ const STATIC = [
   'js/rondetijd.js',
   'js/tirepressure.js',
   'js/notifications.js',
+  'js/lib/supabase.min.js',
+  'js/lib/capacitor.min.js',
   'images/Vonk-Logo.png',
   'images/Vonk-Logo-dark.png',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+  'fonts/bebas-neue-400.woff2',
+  'fonts/barlow-condensed-300.woff2',
+  'fonts/barlow-condensed-400.woff2',
+  'fonts/barlow-condensed-600.woff2',
+  'fonts/barlow-condensed-700.woff2',
+  'fonts/barlow-300.woff2',
+  'fonts/barlow-400.woff2',
+  'fonts/barlow-500.woff2',
 ];
 
 // Install — pre-cache everything

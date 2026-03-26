@@ -290,18 +290,36 @@ const OfflineSync = (() => {
     const raw   = { ...globalObj };
     const entry = _reg.get(tableName);
     const sort  = entry && entry.sort;
+    let _swrT   = 0; // timestamp of last background Supabase refresh (per-page-visit)
     Object.assign(globalObj, {
       async getAll() {
+        let cached;
+        try { cached = await idbGetAll(tableName); } catch (_) { cached = []; }
+
+        if (cached.length > 0) {
+          // IDB-first: return stale data immediately, refresh Supabase in background.
+          // Debounce with 30s to prevent re-fetch loops from _notifyRefresh callbacks.
+          const now = Date.now();
+          if (now - _swrT > 30_000) {
+            _swrT = now;
+            raw.getAll().then(async data => {
+              await idbClear(tableName);
+              await idbPutAll(tableName, data);
+              _notifyRefresh(tableName);
+            }).catch(() => {});
+          }
+          return sort ? [...cached].sort(sort) : cached;
+        }
+
+        // IDB empty — first-ever load, must wait for network
+        _swrT = Date.now();
         try {
           const data = await raw.getAll();
           await idbClear(tableName);
           await idbPutAll(tableName, data);
           return data;
         } catch (e) {
-          if (isNetworkError(e)) {
-            const cached = await idbGetAll(tableName);
-            return sort ? cached.sort(sort) : cached;
-          }
+          if (isNetworkError(e)) return [];
           throw e;
         }
       },

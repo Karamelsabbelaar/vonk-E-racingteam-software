@@ -1,0 +1,65 @@
+name: kartpit
+description: "KartPit — Vonk Racing Software (Flutter)"
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # Backend & Storage
+  supabase_flutter: ^2.0.0
+  shared_preferences: ^2.2.0
+  path: ^1.8.0
+  
+  # UI & Navigation
+  go_router: ^14.2.0
+  flutter_svg: ^2.0.0
+  
+  # Data & Networking
+  http: ^1.1.0
+  uuid: ^4.0.0
+  
+  # Performance & Offline
+  sqflite: ^2.3.0
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: BebasNeue
+      fonts:
+        - asset: fonts/bebas-neue-400.ttf
+          weight: 400
+    - family: BarlowCondensed
+      fonts:
+        - asset: fonts/barlow-condensed-300.ttf
+          weight: 300
+        - asset: fonts/barlow-condensed-400.ttf
+          weight: 400
+        - asset: fonts/barlow-condensed-600.ttf
+          weight: 600
+        - asset: fonts/barlow-condensed-700.ttf
+          weight: 700
+    - family: Barlow
+      fonts:
+        - asset: fonts/barlow-300.ttf
+          weight: 300
+        - asset: fonts/barlow-400.ttf
+          weight: 400
+        - asset: fonts/barlow-500.ttf
+          weight: 500

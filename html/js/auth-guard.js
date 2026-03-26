@@ -3,7 +3,8 @@
  * Ensures user is logged in before page is fully loaded
  */
 
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+// Uses the UMD global loaded by js/lib/supabase.min.js (avoids duplicate CDN fetch)
+const { createClient } = window.supabase;
 
 // ── CONFIG — Supabase connection ────────────────────────
 const SUPABASE_URL  = 'https://tzzuxemddkgvgipsaadr.supabase.co';

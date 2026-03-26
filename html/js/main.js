@@ -272,7 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
   Modal.init();
   setActiveNav();
   initBackTransition();
-  initAdminLink();
+  if ('requestIdleCallback' in window) requestIdleCallback(initAdminLink);
+  else setTimeout(initAdminLink, 200);
   initNumberSteppers();
 
   // Fullscreen: hide status bar — only on Capacitor (Android), not in browser

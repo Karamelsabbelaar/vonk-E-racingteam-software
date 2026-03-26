@@ -62,19 +62,19 @@ async function renderTirePressureHistory() {
           ${new Date(row.created_at).toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'short' })}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;max-width:320px;margin-bottom:10px;border:2px solid var(--border);border-radius:8px;overflow:hidden">
-          <div style="padding:10px 12px;background:var(--surface2)">
+          <div style="padding:10px 12px;background:var(--bg3)">
             <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Links voor</div>
             <div style="font-family:var(--font-display);font-size:22px;color:var(--accent)">${fmtVal(row.links_voor)}</div>
           </div>
-          <div style="padding:10px 12px;background:var(--surface2);border-left:2px solid var(--border)">
+          <div style="padding:10px 12px;background:var(--bg3);border-left:2px solid var(--border)">
             <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Rechts voor</div>
             <div style="font-family:var(--font-display);font-size:22px;color:var(--accent)">${fmtVal(row.rechts_voor)}</div>
           </div>
-          <div style="padding:10px 12px;background:var(--surface2);border-top:2px solid var(--border)">
+          <div style="padding:10px 12px;background:var(--bg3);border-top:2px solid var(--border)">
             <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Links achter</div>
             <div style="font-family:var(--font-display);font-size:22px;color:var(--accent)">${fmtVal(row.links_achter)}</div>
           </div>
-          <div style="padding:10px 12px;background:var(--surface2);border-top:2px solid var(--border);border-left:2px solid var(--border)">
+          <div style="padding:10px 12px;background:var(--bg3);border-top:2px solid var(--border);border-left:2px solid var(--border)">
             <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Rechts achter</div>
             <div style="font-family:var(--font-display);font-size:22px;color:var(--accent)">${fmtVal(row.rechts_achter)}</div>
           </div>

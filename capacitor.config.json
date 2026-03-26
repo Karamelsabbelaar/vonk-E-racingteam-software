@@ -2,6 +2,9 @@
   "appId": "vonk.kartpit.nl",
   "appName": "KartPit",
   "webDir": "html",
+  "android": {
+    "backgroundColor": "#ffffff"
+  },
   "build": {
     "android": {
       "minWebViewVersion": 90
