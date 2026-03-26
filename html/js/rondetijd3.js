@@ -16,9 +16,11 @@ let MS2C = 0;
 let MM1C = 0;
 let SS1C = 0;
 let MS1C = 0;
+let Name3 = "";
+let TimeC = 0;
 
 Klik3.addEventListener('click', () => {
-    let Name3 = document.forms["Name3"]["nameInput3"].value;
+    Name3 = document.forms["Name3"]["nameInput3"].value;
 
     const EName3 = document.getElementById("Name3");
     EName3.remove();
@@ -42,7 +44,7 @@ knop3.addEventListener('click', () => {
     console.log("Aantal rondes:")
     console.log(RondesC);
 
-   let Time = toMilliseconds(MM, SS, MS);
+   TimeC = toMilliseconds(MM, SS, MS);
    console.log("Time in MS:")
     console.log(Time)
 
@@ -101,4 +103,11 @@ knop3.addEventListener('click', () => {
     console.log(GemMS);
 
     EGem.textContent = GemMM + ":" + GemSS + "," + GemMS;
+    driver = Name3;
+    lap_ms = TimeC;
+    lap_number = RondesC;
+    console.log("Driver:", driver);
+    console.log("Lap number:", lap_number);
+    console.log("Lap time (ms):", lap_ms);
+    addLapTime();
 });

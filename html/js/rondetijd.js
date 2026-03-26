@@ -44,7 +44,7 @@ knop.addEventListener('click', () => {
     console.log("Aantal rondes:")
     console.log(Rondes);
 
-   let Time = toMilliseconds(MM, SS, MS);
+   Time = toMilliseconds(MM, SS, MS);
    console.log("Time in MS:")
     console.log(Time)
 
@@ -103,4 +103,12 @@ knop.addEventListener('click', () => {
     console.log(GemMS);
 
     EGem.textContent = GemMM + ":" + GemSS + "," + GemMS;
+
+    driver = Name1;
+    lap_ms = Time;
+    lap_number = Rondes;
+    console.log("Driver:", driver);
+    console.log("Lap number:", lap_number);
+    console.log("Lap time (ms):", lap_ms);
+    addLapTime();
 });
