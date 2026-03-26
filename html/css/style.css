@@ -52,6 +52,7 @@
 [data-theme="dark"] .logo-light { display: none; }
 [data-theme="dark"] .logo-dark  { display: block; }
 [data-theme="dark"] .footer { color: var(--text2); }
+[data-theme="dark"] .btn-ghost { color: var(--text2); }
 [data-theme="dark"] .quicknav-card { box-shadow: 0 2px 20px rgba(0,0,0,0.5); }
 [data-theme="dark"] .quicknav-icon { box-shadow: none; }
 [data-theme="dark"] .section-title { text-shadow: 0 0 22px rgba(229,0,117,0.45); }
@@ -810,7 +811,7 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   transition: opacity .15s;
 }
 
-.checklist-item.done { opacity: 0.5; }
+.checklist-item.done .check-text { opacity: 0.55; }
 
 .check-box {
   width: 22px;
@@ -1125,6 +1126,20 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   .modal { padding: 20px; width: 90vw; }
   .modal-title { font-size: 22px; margin-bottom: 16px; }
 
+  /* Form fields responsive on mobile */
+  .form-row { flex-direction: column; align-items: stretch; }
+  .form-group { min-width: unset; width: 100%; }
+  .form-group[style*="max-width"] { width: 100% !important; max-width: none !important; }
+  
+  /* Containers with max-width constraints */
+  [style*="max-width:360"],
+  [style*="max-width:380"],
+  [style*="max-width:400"] { max-width: 100% !important; width: 100% !important; }
+  
+  /* Admin table responsive */
+  .data-table { table-layout: auto; }
+  .data-table colgroup { display: none; }
+  
   /* theme toggle: go inline on tiny screens so it can't overlap the footer text */
   .footer { justify-content: space-between; }
   .footer > span { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -1146,6 +1161,16 @@ input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
   .btn-lg { font-size: 11px; padding: 9px 12px; }
   .home-page .quicknav-grid { grid-auto-rows: clamp(80px, 24vw, 120px); gap: 8px; }
   .quicknav-label { font-size: 10px; }
+  
+  /* Extra tight form constraints for very small phones */
+  .form-group { min-width: unset; width: 100%; max-width: none; }
+  .form-row { gap: 8px; }
+  
+  /* Tables on tiny phones */
+  .data-table { font-size: 12px; }
+  .data-table thead { display: none; }
+  .data-table tbody tr { display: block; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .data-table td { display: block; padding: 8px; min-height: 20px; }
 }
 
 /* ── Tablets — iPad, Android tablets (769px – 1023px) ─────── */

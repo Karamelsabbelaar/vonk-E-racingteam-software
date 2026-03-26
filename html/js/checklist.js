@@ -26,7 +26,7 @@ function renderList(containerId, items) {
       <div class="check-box"><span class="tick">✓</span></div>
       <div class="check-text">${item.item}</div>
       <button onclick="event.stopPropagation(); removeItem(${item.id})"
-              class="btn btn-ghost btn-sm" style="margin-left:auto;opacity:0.3">✕</button>
+              class="btn btn-ghost btn-sm" style="margin-left:auto;opacity:0.6">✕</button>
     </div>`).join('');
 }
 
