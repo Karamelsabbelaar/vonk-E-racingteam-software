@@ -99,14 +99,30 @@ function initBackTransition() {
     _gurrenTrigger();
   });
 
-  // mobile: tap the page footer/logo 6 times quickly
-  let _taps = 0, _tapTimer;
-  document.addEventListener('touchend', e => {
-    if (e.target.closest('input,textarea,button,a')) return;
-    _taps++;
-    clearTimeout(_tapTimer);
-    _tapTimer = setTimeout(() => { _taps = 0; }, 800);
-    if (_taps >= 6) { _taps = 0; _gurrenTrigger(); }
+  // mobile: press all 4 corners within 4 seconds
+  const _CORNER = 90; // px from each edge counts as a corner
+  let _cornersHit = new Set();
+  let _cornerTimer = null;
+  document.addEventListener('touchstart', e => {
+    const touch = e.touches[0];
+    const x = touch.clientX, y = touch.clientY;
+    const w = window.innerWidth,  h = window.innerHeight;
+    let corner = null;
+    if (x < _CORNER && y < _CORNER)             corner = 'tl';
+    else if (x > w - _CORNER && y < _CORNER)    corner = 'tr';
+    else if (x < _CORNER && y > h - _CORNER)    corner = 'bl';
+    else if (x > w - _CORNER && y > h - _CORNER) corner = 'br';
+    if (!corner) return;
+    if (!_cornersHit.size) {
+      clearTimeout(_cornerTimer);
+      _cornerTimer = setTimeout(() => { _cornersHit.clear(); }, 4000);
+    }
+    _cornersHit.add(corner);
+    if (_cornersHit.size >= 4) {
+      _cornersHit.clear();
+      clearTimeout(_cornerTimer);
+      _gurrenTrigger();
+    }
   }, { passive: true });
 }
 
@@ -284,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
               <span class="badge ${TYPE_BADGE[t.type] || 'badge-yellow'}">${t.type}</span>
-              <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.4">✕</button>
+              <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.6">✕</button>
             </div>
           </div>
           <div class="track-body">
