@@ -1,12 +1,6 @@
 /**
- * KartPit — Gedeelde utilities
+ * KartPit — Shared utilities
  */
-
-// ── Service Worker ─────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('../sw.js', { scope: './' })
-    .catch(() => {}); // silently fail in non-HTTPS dev environments
-}
 
 // ── Toast ──────────────────────────────────────────────────────
 const Toast = {
@@ -275,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdminLink();
   initNumberSteppers();
 
-  // Fullscreen: hide status bar — only on Capacitor (Android), not in browser
+  // Hide status bar on Android — only on Capacitor, not in browser
   if (window.Capacitor && document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(() => {});
   }

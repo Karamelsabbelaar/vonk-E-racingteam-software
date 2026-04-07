@@ -150,20 +150,20 @@
   }
 
   async function loadHome() {
-    // 1) Render from IndexedDB cache immediately (stale-while-revalidate)
+    // Load cached data first, then fetch fresh from network
     try {
       const [cachedTracks, cachedPitstops, cachedAgenda] = await Promise.all([
-        OfflineSync.idbGetAll('tracks'),
-        OfflineSync.idbGetAll('pitstops'),
-        OfflineSync.idbGetAll('agenda'),
+        OfflineSync.getAll('tracks'),
+        OfflineSync.getAll('pitstops'),
+        OfflineSync.getAll('agenda'),
       ]);
       if (cachedTracks.length || cachedPitstops.length || cachedAgenda.length) {
         renderStats(cachedTracks, cachedPitstops, cachedAgenda);
         renderAgendaPreview(cachedAgenda);
       }
-    } catch (e) { /* cache not yet ready, skip */ }
+    } catch (e) { /* cache not yet ready */ }
 
-    // 2) Fetch fresh data from network and update
+    // Fetch fresh data and update display
     try {
       const [tracks, pitstops, agenda] = await Promise.all([
         Tracks.getAll(), Pitstops.getAll(), Agenda.getAll()
@@ -171,9 +171,9 @@
       renderStats(tracks, pitstops, agenda);
       renderAgendaPreview(agenda);
     } catch(e) {
-      console.error('[KartPit] loadHome fout:', e);
+      console.error('Failed to load home data:', e);
       if (OfflineSync.isNetworkError(e)) {
-        Toast.show('Geen verbinding – data uit cache geladen', 'error', 4000);
+        Toast.show('No connection - showing cached data', 'error', 4000);
       }
     }
   }
