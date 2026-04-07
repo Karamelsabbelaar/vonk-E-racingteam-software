@@ -1,212 +1,215 @@
 /**
- * KartPit - Offline / Online Sync
- *
- * Hoe het werkt:
- *  - Bij elke GET wordt eerst Supabase geprobeerd en het resultaat lokaal opgeslagen.
- *  - Als Supabase niet bereikbaar is (geen wifi/internet), wordt de lokale cache gebruikt.
- *  - Schrijfacties die mislukken worden in een wachtrij gezet en automatisch
- *    opnieuw verstuurd zodra de verbinding terugkomt.
- *
- * Nieuw module/tabel toevoegen:
- *  1. Roep VOOR OfflineSync.init() aan:
- *       OfflineSync.registerTable('jouw_tabel', {
- *         query: () => db.from('jouw_tabel').select('*').order('id'),
- *         sort:  (a, b) => a.id - b.id,
- *       });
- *  2. Registreer UI-refresh callbacks:
- *       OfflineSync.registerRefreshHandler('jouw_tabel', renderJouwDing);
- *  3. Verhoog DB_VER met 1 in offline.js (zodat IDB de nieuwe store aanmaakt).
- *  4. Wrap je module (generieke getAll + remove):
- *       const _raw = OfflineSync.makeOfflineWrapper(JouwModule, 'jouw_tabel');
- *       Object.assign(JouwModule, { async add(...) { ... } });
- *
- * Dark / light mode:
- *  Alle componenten gebruiken CSS-variabelen (var(--bg), var(--text), var(--card) enz.).
- *  Nieuwe componenten krijgen automatisch dark+light mode door dezelfde variabelen te gebruiken.
- *  Zie :root en [data-theme="dark"] in style.css.
+ * KartPit Offline Mode
+ * 
+ * Handles local caching and syncing with Supabase.
+ * When offline, all data is stored locally and synced when connection returns.
  */
 
 'use strict';
 
 const OfflineSync = (() => {
   const DB_NAME = 'kartpit';
-  const DB_VER  = 2;   // verhoog bij elke nieuwe tabel
-  let _idb    = null;
-  let _online = navigator.onLine;
+  const DB_VERSION = 2;
+  
+  let indexedDB = null;
+  let isOnline = navigator.onLine;
+  
+  // Keep track of registered tables and their refresh handlers
+  const tables = new Map();
 
-  // Per-tabel registry: Map<naam, { query, sort, refreshFns[] }>
-  const _reg = new Map();
-
-  // ---- Registratie API (aanroepen voor init()) ------------------
-
+  
+  // Register a table for offline syncing
   function registerTable(name, { query, sort } = {}) {
-    const prev = _reg.get(name) || { refreshFns: [] };
-    _reg.set(name, {
+    const existing = tables.get(name) || { refreshFns: [] };
+    tables.set(name, {
       query: query || (() => db.from(name).select('*').order('id')),
-      sort:  sort  || ((a, b) => (a.id < b.id ? -1 : 1)),
-      refreshFns: prev.refreshFns,
+      sort: sort || ((a, b) => (a.id < b.id ? -1 : 1)),
+      refreshFns: existing.refreshFns,
     });
   }
 
-  function registerRefreshHandler(name, ...fns) {
-    const entry = _reg.get(name);
-    if (!entry) { console.warn('[KartPit offline] Onbekende tabel:', name); return; }
-    entry.refreshFns.push(...fns);
+  // Add a handler to refresh the UI when this table is synced
+  function registerRefreshHandler(name, ...handlers) {
+    const entry = tables.get(name);
+    if (!entry) { 
+      console.warn('Table not registered:', name); 
+      return; 
+    }
+    entry.refreshFns.push(...handlers);
   }
 
-  // ---- Netwerk fout herkennen -----------------------------------
-
-  function isNetworkError(e) {
-    return e instanceof TypeError ||
-           (e && typeof e.message === 'string' &&
-            (e.message.includes('fetch') || e.message.includes('network') ||
-             e.message.includes('Failed') || e.message.includes('NetworkError')));
+  // Check if an error is network-related
+  function isNetworkError(err) {
+    return err instanceof TypeError ||
+           (err && typeof err.message === 'string' &&
+            (err.message.includes('fetch') || 
+             err.message.includes('network') ||
+             err.message.includes('Failed') || 
+             err.message.includes('NetworkError')));
   }
 
-  // ---- IndexedDB helpers ---------------------------------------
-
-  function openIDB() {
+  
+  // Open or get the IndexedDB database
+  function openDatabase() {
     return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded = e => {
-        const d = e.target.result;
-        for (const name of _reg.keys()) {
-          if (!d.objectStoreNames.contains(name))
-            d.createObjectStore(name, { keyPath: 'id' });
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      
+      request.onupgradeneeded = (event) => {
+        const database = event.target.result;
+        
+        // Create stores for registered tables
+        for (const tableName of tables.keys()) {
+          if (!database.objectStoreNames.contains(tableName)) {
+            database.createObjectStore(tableName, { keyPath: 'id' });
+          }
         }
-        if (!d.objectStoreNames.contains('pending_ops'))
-          d.createObjectStore('pending_ops', { keyPath: '_qid', autoIncrement: true });
+        
+        // Create queue for pending operations
+        if (!database.objectStoreNames.contains('pending_ops')) {
+          database.createObjectStore('pending_ops', { keyPath: '_qid', autoIncrement: true });
+        }
       };
-      req.onsuccess = e => { _idb = e.target.result; resolve(_idb); };
-      req.onerror   = e => reject(e.target.error);
+      
+      request.onsuccess = (event) => {
+        indexedDB = event.target.result;
+        resolve(indexedDB);
+      };
+      
+      request.onerror = (event) => reject(event.target.error);
     });
   }
 
-  async function idb() {
-    if (!_idb) await openIDB();
-    return _idb;
+  async function getDB() {
+    if (!indexedDB) await openDatabase();
+    return indexedDB;
   }
 
-  async function idbGetAll(store) {
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const req = d.transaction(store, 'readonly').objectStore(store).getAll();
-      req.onsuccess = () => res(req.result || []);
-      req.onerror   = () => rej(req.error);
+  async function getAll(storeName) {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction(storeName, 'readonly');
+      const store = transaction.objectStore(storeName);
+      const request = store.getAll();
+      
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
     });
   }
 
-  async function idbPutAll(store, records) {
+  async function saveAll(storeName, records) {
     if (!records || !records.length) return;
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const tx = d.transaction(store, 'readwrite');
-      const os = tx.objectStore(store);
-      records.forEach(r => os.put(r));
-      tx.oncomplete = res;
-      tx.onerror    = () => rej(tx.error);
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      records.forEach(record => store.put(record));
+      
+      transaction.oncomplete = resolve;
+      transaction.onerror = () => reject(transaction.error);
     });
   }
 
-  async function idbPut(store, record) {
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const req = d.transaction(store, 'readwrite').objectStore(store).put(record);
-      req.onsuccess = res;
-      req.onerror   = () => rej(req.error);
+  async function saveOne(storeName, record) {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, 'readwrite')
+        .objectStore(storeName)
+        .put(record);
+      
+      request.onsuccess = resolve;
+      request.onerror = () => reject(request.error);
     });
   }
 
-  async function idbDelete(store, key) {
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const req = d.transaction(store, 'readwrite').objectStore(store).delete(key);
-      req.onsuccess = res;
-      req.onerror   = () => rej(req.error);
+  async function deleteOne(storeName, key) {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, 'readwrite')
+        .objectStore(storeName)
+        .delete(key);
+      
+      request.onsuccess = resolve;
+      request.onerror = () => reject(request.error);
     });
   }
 
-  async function idbUpdate(store, key, changes) {
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const tx = d.transaction(store, 'readwrite');
-      const os = tx.objectStore(store);
-      const getReq = os.get(key);
-      getReq.onsuccess = () => {
-        if (getReq.result) os.put({ ...getReq.result, ...changes });
+  async function updateOne(storeName, key, changes) {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const transaction = database.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      const getRequest = store.get(key);
+      
+      getRequest.onsuccess = () => {
+        if (getRequest.result) {
+          store.put({ ...getRequest.result, ...changes });
+        }
       };
-      tx.oncomplete = res;
-      tx.onerror    = () => rej(tx.error);
+      
+      transaction.oncomplete = resolve;
+      transaction.onerror = () => reject(transaction.error);
     });
   }
 
-  async function idbUpdateAll(store, changes) {
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const tx = d.transaction(store, 'readwrite');
-      const os = tx.objectStore(store);
-      const req = os.openCursor();
-      req.onsuccess = e => {
-        const cursor = e.target.result;
-        if (cursor) { cursor.update({ ...cursor.value, ...changes }); cursor.continue(); }
-      };
-      tx.oncomplete = res;
-      tx.onerror    = () => rej(tx.error);
+  async function clearStore(storeName) {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction(storeName, 'readwrite')
+        .objectStore(storeName)
+        .clear();
+      
+      request.onsuccess = resolve;
+      request.onerror = () => reject(request.error);
     });
   }
 
-  async function idbClear(store) {
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const req = d.transaction(store, 'readwrite').objectStore(store).clear();
-      req.onsuccess = res;
-      req.onerror   = () => rej(req.error);
+  
+  async function queueOperation(operation) {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction('pending_ops', 'readwrite')
+        .objectStore('pending_ops')
+        .add({ ...operation, _timestamp: Date.now() });
+      
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
     });
   }
 
-  // ---- Pending ops queue ---------------------------------------
-
-  async function enqueue(op) {
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const req = d.transaction('pending_ops', 'readwrite')
-                    .objectStore('pending_ops')
-                    .add({ ...op, _ts: Date.now() });
-      req.onsuccess = () => res(req.result);
-      req.onerror   = () => rej(req.error);
+  async function removeFromQueue(queueId) {
+    const database = await getDB();
+    return new Promise((resolve, reject) => {
+      const request = database.transaction('pending_ops', 'readwrite')
+        .objectStore('pending_ops')
+        .delete(queueId);
+      
+      request.onsuccess = resolve;
+      request.onerror = () => reject(request.error);
     });
   }
 
-  async function dequeueOp(qid) {
-    const d = await idb();
-    return new Promise((res, rej) => {
-      const req = d.transaction('pending_ops', 'readwrite')
-                    .objectStore('pending_ops').delete(qid);
-      req.onsuccess = res;
-      req.onerror   = () => rej(req.error);
-    });
-  }
-
-  // ---- Sync: replay queue to Supabase --------------------------
-
-  async function syncPending() {
-    const ops = await idbGetAll('pending_ops');
-    if (!ops.length) return;
-    ops.sort((a, b) => a._ts - b._ts);
-    for (const op of ops) {
+  async function syncQueue() {
+    const operations = await getAll('pending_ops');
+    if (!operations.length) return;
+    
+    // Sort by timestamp so we apply changes in order
+    operations.sort((a, b) => a._timestamp - b._timestamp);
+    
+    for (const op of operations) {
       try {
-        await replayOp(op);
-        await dequeueOp(op._qid);
-      } catch (e) {
-        console.warn('[KartPit offline] Sync mislukt, wordt later opnieuw geprobeerd:', op, e);
+        await applyOperation(op);
+        await removeFromQueue(op._qid);
+      } catch (error) {
+        console.warn('Sync failed, will retry:', op, error);
         break;
       }
     }
-    await refreshCaches();
-    _notifyRefresh('all');
+    
+    await refreshAllCaches();
+    notifyRefresh('all');
   }
 
-  async function replayOp({ table, op, data, filter }) {
+  async function applyOperation({ table, op, data, filter }) {
     switch (op) {
       case 'insert': {
         const { error } = await db.from(table).insert(data);
@@ -214,10 +217,10 @@ const OfflineSync = (() => {
         break;
       }
       case 'update': {
-        let q = db.from(table).update(data);
-        if (filter && filter.neqId !== undefined) q = q.neq('id', filter.neqId);
-        else if (filter && filter.id !== undefined) q = q.eq('id', filter.id);
-        const { error } = await q;
+        let query = db.from(table).update(data);
+        if (filter?.id) query = query.eq('id', filter.id);
+        else if (filter?.neqId) query = query.neq('id', filter.neqId);
+        const { error } = await query;
         if (error) throw error;
         break;
       }
@@ -229,185 +232,189 @@ const OfflineSync = (() => {
     }
   }
 
-  async function refreshCaches() {
-    for (const [table, { query }] of _reg) {
+  async function refreshAllCaches() {
+    for (const [tableName, { query }] of tables) {
       try {
         const { data, error } = await query();
         if (!error && data) {
-          await idbClear(table);
-          await idbPutAll(table, data);
+          await clearStore(tableName);
+          await saveAll(tableName, data);
         }
-      } catch { /* negeer individuele fouten */ }
+      } catch {
+        // Skip individual errors, continue with other tables
+      }
     }
   }
 
-  // ---- UI refresh na sync --------------------------------------
-
-  function _notifyRefresh(table) {
-    const run = entry => entry.refreshFns.forEach(fn => typeof fn === 'function' && fn());
-    if (table === 'all') {
-      for (const entry of _reg.values()) run(entry);
+  function notifyRefresh(tableName) {
+    const runHandlers = (entry) => {
+      entry.refreshFns.forEach(fn => {
+        if (typeof fn === 'function') fn();
+      });
+    };
+    
+    if (tableName === 'all') {
+      for (const entry of tables.values()) runHandlers(entry);
     } else {
-      const entry = _reg.get(table);
-      if (entry) run(entry);
+      const entry = tables.get(tableName);
+      if (entry) runHandlers(entry);
     }
   }
 
-  function _tempId() {
+  function generateTempId() {
     return Date.now() * 1000 + Math.floor(Math.random() * 1000);
   }
 
-  // ---- Sync banner UI ------------------------------------------
-
-  const _SVG = {
-    up:    '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"><path d="M8 12V4M4 7l4-4 4 4"/><path d="M3 14h10" stroke-width="1.5" opacity=".5"/></svg>',
-    check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"><polyline points="2 8 6 12 14 4"/></svg>',
-    warn:  '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"><path d="M8 2 L14 14 H2 Z"/><line x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="12.5" r=".6" fill="currentColor" stroke="none"/></svg>',
+  
+  const syncIcons = {
+    syncing: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"><path d="M8 12V4M4 7l4-4 4 4"/><path d="M3 14h10" stroke-width="1.5" opacity=".5"/></svg>',
+    done: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"><polyline points="2 8 6 12 14 4"/></svg>',
+    offline: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:middle;margin-right:6px"><path d="M8 2 L14 14 H2 Z"/><line x1="8" y1="7" x2="8" y2="10"/><circle cx="8" cy="12.5" r=".6" fill="currentColor" stroke="none"/></svg>',
   };
 
-  function showBanner(state, extra) {
+  function showSyncBanner(status, extra) {
     const banner = document.getElementById('sync-banner');
     if (!banner) return;
-    if (state === 'syncing') {
-      const count = extra ? ` (${extra} wijziging${extra !== 1 ? 'en' : ''})` : '';
-      banner.innerHTML = _SVG.up + `Synchroniseren…${count}`;
+    
+    if (status === 'syncing') {
+      const plural = extra !== 1 ? 'en' : '';
+      const details = extra ? ` (${extra} aanpassing${plural})` : '';
+      banner.innerHTML = syncIcons.syncing + `Synchroniseren…${details}`;
       banner.className = 'sync-banner sync-syncing';
-    } else if (state === 'done') {
-      banner.innerHTML = _SVG.check + 'Gesynchroniseerd';
+    } 
+    else if (status === 'done') {
+      banner.innerHTML = syncIcons.done + 'Gesynchroniseerd';
       banner.className = 'sync-banner sync-online';
       setTimeout(() => { banner.className = 'sync-banner sync-hidden'; }, 2500);
-    } else if (state === 'offline') {
-      banner.innerHTML = _SVG.warn + 'Geen verbinding – wijzigingen worden lokaal opgeslagen';
+    } 
+    else if (status === 'offline') {
+      banner.innerHTML = syncIcons.offline + 'Geen verbinding - wijzigingen opgeslagen';
       banner.className = 'sync-banner sync-offline';
     }
   }
 
-  // ---- Generic offline wrapper factory -------------------------
-  // Voegt generieke getAll() en remove() toe aan een module-object.
-  // Geeft het originele (unwrapped) object terug voor extra methoden.
-
-  function makeOfflineWrapper(globalObj, tableName) {
-    const raw   = { ...globalObj };
-    const entry = _reg.get(tableName);
-    const sort  = entry && entry.sort;
-    Object.assign(globalObj, {
+  function makeOfflineWrapper(module, tableName) {
+    const original = { ...module };
+    const entry = tables.get(tableName);
+    const sortFn = entry?.sort;
+    
+    // Override getAll to cache locally
+    Object.assign(module, {
       async getAll() {
         try {
-          const data = await raw.getAll();
-          await idbClear(tableName);
-          await idbPutAll(tableName, data);
+          const data = await original.getAll();
+          await clearStore(tableName);
+          await saveAll(tableName, data);
           return data;
-        } catch (e) {
-          if (isNetworkError(e)) {
-            const cached = await idbGetAll(tableName);
-            return sort ? cached.sort(sort) : cached;
+        } catch (err) {
+          if (isNetworkError(err)) {
+            const cached = await getAll(tableName);
+            return sortFn ? cached.sort(sortFn) : cached;
           }
-          throw e;
+          throw err;
         }
       },
+      
+      // Override remove to cache deletion
       async remove(id) {
         try {
-          await raw.remove(id);
-          await idbDelete(tableName, id);
-        } catch (e) {
-          if (isNetworkError(e)) {
-            await idbDelete(tableName, id);
-            await enqueue({ table: tableName, op: 'delete', filter: { id } });
-            _notifyRefresh(tableName);
+          await original.remove(id);
+          await deleteOne(tableName, id);
+        } catch (err) {
+          if (isNetworkError(err)) {
+            await deleteOne(tableName, id);
+            await queueOperation({ table: tableName, op: 'delete', filter: { id } });
+            notifyRefresh(tableName);
             return;
           }
-          throw e;
+          throw err;
         }
       },
     });
-    return raw;
+    
+    return original;
   }
 
-  // ---- Init ----------------------------------------------------
-
-  async function _doSync() {
-    const pending = await idbGetAll('pending_ops');
-    if (pending.length) showBanner('syncing', pending.length);
-    await syncPending();
-    await refreshCaches();
+  
+  async function performSync() {
+    const pending = await getAll('pending_ops');
+    if (pending.length) showSyncBanner('syncing', pending.length);
+    
+    await syncQueue();
+    await refreshAllCaches();
+    
     if (pending.length) {
-      showBanner('done');
-      _notifyRefresh('all');
+      showSyncBanner('done');
+      notifyRefresh('all');
     }
   }
 
-  async function init() {
-    await openIDB();
+  async function initialize() {
+    // Open the database
+    await openDatabase();
 
+    // Add sync banner to page
     const banner = document.createElement('div');
-    banner.id        = 'sync-banner';
+    banner.id = 'sync-banner';
     banner.className = 'sync-banner sync-hidden';
     document.body.prepend(banner);
 
+    // Try initial sync
     try {
-      await _doSync();
-    } catch {
-      _online = false;
-      showBanner('offline');
+      await performSync();
+    } catch (err) {
+      isOnline = false;
+      showSyncBanner('offline');
     }
 
+    // Listen for connection changes
     window.addEventListener('offline', () => {
-      _online = false;
-      showBanner('offline');
+      isOnline = false;
+      showSyncBanner('offline');
     });
 
     window.addEventListener('online', async () => {
-      _online = true;
-      try { await _doSync(); } catch { /* stil falen */ }
+      isOnline = true;
+      try { 
+        await performSync(); 
+      } catch (err) {
+        // Stay silent if sync fails
+      }
     });
   }
 
   return {
-    isOnline:              () => _online,
+    isOnline: () => isOnline,
     isNetworkError,
     registerTable,
     registerRefreshHandler,
     makeOfflineWrapper,
-    idbGetAll,
-    idbPutAll,
-    idbPut,
-    idbDelete,
-    idbUpdate,
-    idbUpdateAll,
-    idbClear,
-    enqueue,
-    init,
-    syncPending,
-    refreshCaches,
-    _tempId,
-    _notifyRefresh,
+    getAll,
+    saveAll,
+    saveOne,
+    deleteOne,
+    updateOne,
+    clearStore,
+    queueOperation,
+    initialize,
+    syncQueue,
+    refreshAllCaches,
+    generateTempId,
+    notifyRefresh,
   };
 })();
 
-// =================================================================
-// Registratie van bestaande tabellen
-//
-// Voeg hier nieuwe tabellen toe VOOR OfflineSync.init().
-// Verhoog DB_VER met 1 bij elke nieuwe tabel!
-// =================================================================
-
-OfflineSync.registerTable('checklist_items', {
-  query: () => db.from('checklist_items').select('*').order('id'),
-  sort:  (a, b) => a.id - b.id,
-});
-OfflineSync.registerRefreshHandler('checklist_items',
-  () => typeof loadChecklist === 'function' && loadChecklist(),
-);
-
+// Set up agenda syncing
 OfflineSync.registerTable('agenda', {
   query: () => db.from('agenda').select('*').order('time'),
   sort:  (a, b) => String(a.time).localeCompare(String(b.time)),
 });
 OfflineSync.registerRefreshHandler('agenda',
   () => typeof loadAgendaPreview === 'function' && loadAgendaPreview(),
-  () => typeof renderAgenda      === 'function' && renderAgenda(),
+  () => typeof renderAgenda === 'function' && renderAgenda(),
 );
 
+// Set up pitstops syncing
 OfflineSync.registerTable('pitstops', {
   query: () => db.from('pitstops').select('*').order('created_at', { ascending: false }),
   sort:  (a, b) => new Date(b.created_at) - new Date(a.created_at),
@@ -416,6 +423,7 @@ OfflineSync.registerRefreshHandler('pitstops',
   () => typeof PitTimer !== 'undefined' && typeof PitTimer.load === 'function' && PitTimer.load(),
 );
 
+// Set up tracks syncing
 OfflineSync.registerTable('tracks', {
   query: () => db.from('tracks').select('*').order('name'),
   sort:  (a, b) => String(a.name).localeCompare(String(b.name)),
@@ -424,28 +432,20 @@ OfflineSync.registerRefreshHandler('tracks',
   () => typeof renderTracks === 'function' && renderTracks(),
 );
 
-// =================================================================
-// Offline-aware wrappers
-//
-// makeOfflineWrapper() voegt generieke getAll() + remove() toe.
-// Tabel-specifieke methoden worden er daarna aan toegevoegd.
-//
-// Nieuw module toevoegen:
-//   const _raw = OfflineSync.makeOfflineWrapper(MijnModule, 'mijn_tabel');
-//   Object.assign(MijnModule, { async add(data) { ... } });
-// =================================================================
+// Module wrappers for offline support
+// Each module has its own offline-aware methods for add/update/delete
 
-// --- Checklist ---------------------------------------------------
-const _rawChecklist = OfflineSync.makeOfflineWrapper(Checklist, 'checklist_items');
+// Checklist module
+const checklistRaw = OfflineSync.makeOfflineWrapper(Checklist, 'checklist_items');
 Object.assign(Checklist, {
   async toggle(id, done) {
     try {
-      await _rawChecklist.toggle(id, done);
-      await OfflineSync.idbUpdate('checklist_items', id, { done });
+      await checklistRaw.toggle(id, done);
+      await OfflineSync.updateOne('checklist_items', id, { done });
     } catch (e) {
       if (OfflineSync.isNetworkError(e)) {
-        await OfflineSync.idbUpdate('checklist_items', id, { done });
-        await OfflineSync.enqueue({ table: 'checklist_items', op: 'update', data: { done }, filter: { id } });
+        await OfflineSync.updateOne('checklist_items', id, { done });
+        await OfflineSync.queueOperation({ table: 'checklist_items', op: 'update', data: { done }, filter: { id } });
         return;
       }
       throw e;
@@ -453,11 +453,11 @@ Object.assign(Checklist, {
   },
 
   async add(item, category) {
-    try { await _rawChecklist.add(item, category); } catch (e) {
+    try { await checklistRaw.add(item, category); } catch (e) {
       if (OfflineSync.isNetworkError(e)) {
-        await OfflineSync.idbPut('checklist_items', { id: OfflineSync._tempId(), item, category, done: false });
-        await OfflineSync.enqueue({ table: 'checklist_items', op: 'insert', data: { item, category, done: false } });
-        OfflineSync._notifyRefresh('checklist_items');
+        await OfflineSync.saveOne('checklist_items', { id: OfflineSync.generateTempId(), item, category, done: false });
+        await OfflineSync.queueOperation({ table: 'checklist_items', op: 'insert', data: { item, category, done: false } });
+        OfflineSync.notifyRefresh('checklist_items');
         return;
       }
       throw e;
@@ -465,11 +465,11 @@ Object.assign(Checklist, {
   },
 
   async resetAll() {
-    try { await _rawChecklist.resetAll(); } catch (e) {
+    try { await checklistRaw.resetAll(); } catch (e) {
       if (OfflineSync.isNetworkError(e)) {
-        await OfflineSync.idbUpdateAll('checklist_items', { done: false });
-        await OfflineSync.enqueue({ table: 'checklist_items', op: 'update', data: { done: false }, filter: { neqId: 0 } });
-        OfflineSync._notifyRefresh('checklist_items');
+        await OfflineSync.saveAll('checklist_items', { done: false });
+        await OfflineSync.queueOperation({ table: 'checklist_items', op: 'update', data: { done: false }, filter: { neqId: 0 } });
+        OfflineSync.notifyRefresh('checklist_items');
         return;
       }
       throw e;
@@ -477,15 +477,15 @@ Object.assign(Checklist, {
   },
 });
 
-// --- Agenda ------------------------------------------------------
-const _rawAgenda = OfflineSync.makeOfflineWrapper(Agenda, 'agenda');
+// Agenda module
+const agendaRaw = OfflineSync.makeOfflineWrapper(Agenda, 'agenda');
 Object.assign(Agenda, {
   async add(time, event, type) {
-    try { await _rawAgenda.add(time, event, type); } catch (e) {
+    try { await agendaRaw.add(time, event, type); } catch (e) {
       if (OfflineSync.isNetworkError(e)) {
-        await OfflineSync.idbPut('agenda', { id: OfflineSync._tempId(), time, event, type });
-        await OfflineSync.enqueue({ table: 'agenda', op: 'insert', data: { time, event, type } });
-        OfflineSync._notifyRefresh('agenda');
+        await OfflineSync.saveOne('agenda', { id: OfflineSync.generateTempId(), time, event, type });
+        await OfflineSync.queueOperation({ table: 'agenda', op: 'insert', data: { time, event, type } });
+        OfflineSync.notifyRefresh('agenda');
         return;
       }
       throw e;
@@ -493,18 +493,18 @@ Object.assign(Agenda, {
   },
 });
 
-// --- Pitstops ----------------------------------------------------
-const _rawPitstops = OfflineSync.makeOfflineWrapper(Pitstops, 'pitstops');
+// Pitstops module
+const pitstopsRaw = OfflineSync.makeOfflineWrapper(Pitstops, 'pitstops');
 Object.assign(Pitstops, {
   async save(duration_ms, label, notes) {
-    try { await _rawPitstops.save(duration_ms, label, notes); } catch (e) {
+    try { await pitstopsRaw.save(duration_ms, label, notes); } catch (e) {
       if (OfflineSync.isNetworkError(e)) {
-        await OfflineSync.idbPut('pitstops', {
-          id: OfflineSync._tempId(), duration_ms, label, notes,
+        await OfflineSync.saveOne('pitstops', {
+          id: OfflineSync.generateTempId(), duration_ms, label, notes,
           created_at: new Date().toISOString(),
         });
-        await OfflineSync.enqueue({ table: 'pitstops', op: 'insert', data: { duration_ms, label, notes } });
-        OfflineSync._notifyRefresh('pitstops');
+        await OfflineSync.queueOperation({ table: 'pitstops', op: 'insert', data: { duration_ms, label, notes } });
+        OfflineSync.notifyRefresh('pitstops');
         return;
       }
       throw e;
@@ -512,15 +512,15 @@ Object.assign(Pitstops, {
   },
 });
 
-// --- Tracks ------------------------------------------------------
-const _rawTracks = OfflineSync.makeOfflineWrapper(Tracks, 'tracks');
+// Tracks module
+const tracksRaw = OfflineSync.makeOfflineWrapper(Tracks, 'tracks');
 Object.assign(Tracks, {
   async add(track) {
-    try { await _rawTracks.add(track); } catch (e) {
+    try { await tracksRaw.add(track); } catch (e) {
       if (OfflineSync.isNetworkError(e)) {
-        await OfflineSync.idbPut('tracks', { id: OfflineSync._tempId(), ...track });
-        await OfflineSync.enqueue({ table: 'tracks', op: 'insert', data: track });
-        OfflineSync._notifyRefresh('tracks');
+        await OfflineSync.saveOne('tracks', { id: OfflineSync.generateTempId(), ...track });
+        await OfflineSync.queueOperation({ table: 'tracks', op: 'insert', data: track });
+        OfflineSync.notifyRefresh('tracks');
         return;
       }
       throw e;

@@ -1,6 +1,12 @@
 /**
- * KartPit — Gedeelde utilities
+ * KartPit — Shared utilities
  */
+
+// ── Service Worker ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('../sw.js', { scope: './' })
+    .catch(() => {}); // silently fail in non-HTTPS dev environments
+}
 
 // ── Toast ──────────────────────────────────────────────────────
 const Toast = {
@@ -21,27 +27,6 @@ const Toast = {
       t.style.transition = 'all .25s';
       setTimeout(() => t.remove(), 260);
     }, duration);
-  }
-};
-
-// ── Taken ─────────────────────────────────────────────────────
-const Tasks = {
-  async getAll() {
-    const { data, error } = await db.from('tasks').select('*').order('created_at');
-    if (error) throw error;
-    return data;
-  },
-  async add(description, assigned_to, category) {
-    const { error } = await db.from('tasks').insert({ description, assigned_to, category, done: false });
-    if (error) throw error;
-  },
-  async remove(id) {
-    const { error } = await db.from('tasks').delete().eq('id', id);
-    if (error) throw error;
-  },
-  async setDone(id, done) {
-    const { error } = await db.from('tasks').update({ done }).eq('id', id);
-    if (error) throw error;
   }
 };
 
@@ -114,26 +99,41 @@ function initBackTransition() {
     _gurrenTrigger();
   });
 
-  // mobile: tap the page footer/logo 6 times quickly
-  let _taps = 0, _tapTimer;
-  document.addEventListener('touchend', e => {
-    if (e.target.closest('input,textarea,button,a')) return;
-    _taps++;
-    clearTimeout(_tapTimer);
-    _tapTimer = setTimeout(() => { _taps = 0; }, 800);
-    if (_taps >= 6) { _taps = 0; _gurrenTrigger(); }
+  // mobile: press all 4 corners within 4 seconds
+  const _CORNER = 90; // px from each edge counts as a corner
+  let _cornersHit = new Set();
+  let _cornerTimer = null;
+  document.addEventListener('touchstart', e => {
+    const touch = e.touches[0];
+    const x = touch.clientX, y = touch.clientY;
+    const w = window.innerWidth,  h = window.innerHeight;
+    let corner = null;
+    if (x < _CORNER && y < _CORNER)             corner = 'tl';
+    else if (x > w - _CORNER && y < _CORNER)    corner = 'tr';
+    else if (x < _CORNER && y > h - _CORNER)    corner = 'bl';
+    else if (x > w - _CORNER && y > h - _CORNER) corner = 'br';
+    if (!corner) return;
+    if (!_cornersHit.size) {
+      clearTimeout(_cornerTimer);
+      _cornerTimer = setTimeout(() => { _cornersHit.clear(); }, 4000);
+    }
+    _cornersHit.add(corner);
+    if (_cornersHit.size >= 4) {
+      _cornersHit.clear();
+      clearTimeout(_cornerTimer);
+      _gurrenTrigger();
+    }
   }, { passive: true });
 }
 
 function _gurrenTrigger() {
   // ???%
   console.groupCollapsed('%c⚡ ROW ROW FIGHT THE POWER ⚡', 'color:#ffd700;font-weight:bold;font-size:15px');
-  console.log('%c"Who the hell do you think I am?!"\n — Kamina, Gurren Lagann', 'color:#f0a500;font-family:monospace');
-  console.log('%c"Don\'t believe in yourself.\n Believe in me — who believes in you."\n — Kamina', 'color:#ccc;font-family:monospace');
+  console.log('%c"Don\'t believe in yourself!\nBelieve in me!\nBelieve in the Kamina who believes in you!"\n — Kamina, Gurren Lagann', 'color:#f0a500;font-family:monospace;font-size:13px');
   console.log('%c"At ???%... I surpass my limits."\n — Shigeo Kageyama, Mob Psycho 100', 'color:#9b59b6;font-family:monospace');
   console.log('%c🌀', 'font-size:48px');
   console.groupEnd();
-  Toast.show('Row row, fight the power! ⚡', 'success', 4000);
+  Toast.show('Don\'t believe in yourself!\nBelieve in me!\nBelieve in the Kamina who believes in you! ⚡', 'success gurren', 5000);
 }
 
 // ── Dark Mode ──────────────────────────────────────────────────
@@ -174,6 +174,48 @@ function _updateThemeBtn(theme) {
   });
 }
 
+// ── Custom Number Steppers ─────────────────────────────────────
+function initNumberSteppers() {
+  document.querySelectorAll('input[type="number"]').forEach(input => {
+    if (input.closest('.num-stepper')) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'num-stepper';
+
+    const minus = document.createElement('button');
+    minus.type = 'button';
+    minus.className = 'num-stepper-btn';
+    minus.setAttribute('aria-label', 'Minder');
+    minus.textContent = '−';
+    minus.addEventListener('click', () => {
+      const step = parseFloat(input.step) || 1;
+      const min  = input.min !== '' ? parseFloat(input.min) : -Infinity;
+      const cur  = parseFloat(input.value) || 0;
+      input.value = Math.max(min, parseFloat((cur - step).toFixed(10)));
+      input.dispatchEvent(new Event('input',  { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    const plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'num-stepper-btn';
+    plus.setAttribute('aria-label', 'Meer');
+    plus.textContent = '+';
+    plus.addEventListener('click', () => {
+      const step = parseFloat(input.step) || 1;
+      const max  = input.max !== '' ? parseFloat(input.max) : Infinity;
+      const cur  = parseFloat(input.value) || 0;
+      input.value = Math.min(max, parseFloat((cur + step).toFixed(10)));
+      input.dispatchEvent(new Event('input',  { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(minus);
+    wrapper.appendChild(input);
+    wrapper.appendChild(plus);
+  });
+}
+
 // ── Hamburger Menu ─────────────────────────────────────────────
 function initHamburgerMenu() {
   const btn      = document.getElementById('hamburgerBtn');
@@ -208,15 +250,33 @@ async function signOutGlobal() {
   window.location.href = 'login.html';
 }
 
+// ── Admin nav link (only shown to admins) ──────────────────────
+async function initAdminLink() {
+  try {
+    if (typeof db === 'undefined') return;
+    const { data: { session } } = await db.auth.getSession();
+    if (session?.user?.app_metadata?.role !== 'admin') return;
+    const nav = document.querySelector('.side-menu-nav');
+    if (!nav || nav.querySelector('a[href="admin.html"]')) return;
+    const li = document.createElement('li');
+    li.innerHTML = `<a href="admin.html" class="side-menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Accountbeheer</a>`;
+    nav.appendChild(li);
+  } catch(_) {}
+}
+
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  document.documentElement.classList.remove('preload');
   initTheme();
+  OfflineSync.initialize();
   initHamburgerMenu();
   Modal.init();
   setActiveNav();
   initBackTransition();
+  initAdminLink();
+  initNumberSteppers();
 
-  // Fullscreen: hide status bar — only on Capacitor (Android), not in browser
+  // Hide status bar on Android — only on Capacitor, not in browser
   if (window.Capacitor && document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(() => {});
   }
@@ -241,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
               <span class="badge ${TYPE_BADGE[t.type] || 'badge-yellow'}">${t.type}</span>
-              <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.4">✕</button>
+              <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.6">✕</button>
             </div>
           </div>
           <div class="track-body">
@@ -323,9 +383,3 @@ async function loadAgendaPreview() {
 document.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('agenda-preview')) loadAgendaPreview();
 });
-
-// ── Banden Spanning ─────────────────────────────────────────────
-async function renderTirePressures() {
-  const pressure = document.getElementById('tire-pressures');
-  if (!pressure) return;
-}

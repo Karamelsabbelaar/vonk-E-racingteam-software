@@ -1,11 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KartPit — Taken</title>
   <link rel="stylesheet" href="css/style.css">
-  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');</script>
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light'); document.documentElement.classList.add('preload'); try { if (!localStorage.getItem('sb-tzzuxemddkgvgipsaadr-auth-token')) window.location.replace('login.html'); } catch(e) {}</script>
   <style>
     .badge-cat-red    { background:#ffd6e0; color:#9e0029; border:1px solid #f0a0b0; font-weight:700; }
     .badge-cat-orange { background:#fff0d6; color:#8a4000; border:1px solid #f0c878; font-weight:700; }
@@ -24,7 +25,7 @@
     window.supabase = supabase;
   </script>
 </head>
-<body>
+<body style="background-color:#ffffff;color:#e94a7a">
 <div class="wrapper">
 
   <nav class="navbar">
@@ -91,7 +92,7 @@
 
   </main>
 
-  <footer class="footer">KartPit &mdash; Amateur Karting Race Manager</footer>
+  <footer class="footer"><span>KartPit &mdash; Amateur Karting Race Manager</span></footer>
 </div>
 
 <div id="toast-container"></div>
@@ -163,7 +164,7 @@ async function renderTasks() {
     list.innerHTML = Object.entries(grouped).map(([cat, items]) => {
       const c = colorForCat(cat);
       const rows = items.map((t, i) => `
-        <div class="agenda-row" data-id="${t.id}" style="${t.done ? 'opacity:0.45' : ''}">
+        <div class="agenda-row" data-id="${t.id}">
           <div class="agenda-time-col">
             <button onclick="toggleDone(${t.id}, ${!t.done})" class="btn btn-ghost btn-sm"
               style="font-size:18px;padding:0 4px;opacity:${t.done ? '1' : '0.35'}">
@@ -178,7 +179,7 @@ async function renderTasks() {
             <div class="agenda-event" style="${t.done ? 'text-decoration:line-through;color:var(--text3)' : ''}">${t.description}</div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px">
               ${t.assigned_to ? `<span class="badge badge-gray">👤 ${t.assigned_to}</span>` : ''}
-              <button onclick="deleteTask(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.4">✕</button>
+              <button onclick="deleteTask(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.6">✕</button>
             </div>
           </div>
         </div>`).join('');

@@ -43,11 +43,21 @@ create table if not exists tracks (
   created_at timestamptz default now()
 );
 
+create table if not exists tasks (
+  id          bigint generated always as identity primary key,
+  description text not null,
+  assigned_to text default '',
+  category    text default 'Overig',
+  done        boolean default false,
+  created_at  timestamptz default now()
+);
+
 -- ── Realtime inschakelen ──────────────────────────────────
 -- (zodat teamleden live updates zien)
 alter publication supabase_realtime add table checklist_items;
 alter publication supabase_realtime add table agenda;
 alter publication supabase_realtime add table pitstops;
+alter publication supabase_realtime add table tasks;
 
 -- ── Row Level Security (publieke toegang voor het team) ───
 -- Iedereen met de anon key kan lezen en schrijven.
@@ -56,11 +66,13 @@ alter table checklist_items enable row level security;
 alter table agenda           enable row level security;
 alter table pitstops         enable row level security;
 alter table tracks           enable row level security;
+alter table tasks            enable row level security;
 
 create policy "Publieke toegang checklist" on checklist_items for all using (true) with check (true);
 create policy "Publieke toegang agenda"    on agenda           for all using (true) with check (true);
 create policy "Publieke toegang pitstops"  on pitstops         for all using (true) with check (true);
 create policy "Publieke toegang tracks"    on tracks           for all using (true) with check (true);
+create policy "Publieke toegang tasks"     on tasks            for all using (true) with check (true);
 
 -- ── Standaard checklist data ──────────────────────────────
 insert into checklist_items (item, category) values

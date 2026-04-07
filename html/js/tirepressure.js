@@ -55,35 +55,32 @@ async function renderTirePressureHistory() {
       return;
     }
 
-    container.innerHTML = `
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Datum</th>
-            <th>LV</th>
-            <th>RV</th>
-            <th>LA</th>
-            <th>RA</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          ${data.map(row => `
-            <tr>
-              <td style="font-size:13px;color:var(--text3)">
-                ${new Date(row.created_at).toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'short' })}
-              </td>
-              <td style="font-family:var(--font-display);font-size:20px">${row.Links_voor ?? '–'}</td>
-              <td style="font-family:var(--font-display);font-size:20px">${row.Rechts_voor ?? '–'}</td>
-              <td style="font-family:var(--font-display);font-size:20px">${row.Links_achter ?? '–'}</td>
-              <td style="font-family:var(--font-display);font-size:20px">${row.Rechts_achter ?? '–'}</td>
-              <td>
-                <button onclick="deleteTirePressure(${row.id})"
-                        class="btn btn-ghost btn-sm" style="opacity:0.4">✕</button>
-              </td>
-            </tr>`).join('')}
-        </tbody>
-      </table>`;
+    const fmtVal = v => (v != null && v !== '') ? `${v} bar` : '–';
+    container.innerHTML = data.map(row => `
+      <div style="border-bottom:1px solid var(--border);padding:16px 0;last-child{border:0}">
+        <div style="font-size:13px;color:var(--text3);margin-bottom:12px">
+          ${new Date(row.created_at).toLocaleString('nl-NL', { dateStyle:'short', timeStyle:'short' })}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;max-width:320px;margin-bottom:10px;border:2px solid var(--border);border-radius:8px;overflow:hidden">
+          <div style="padding:10px 12px;background:var(--surface2)">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Links voor</div>
+            <div style="font-family:var(--font-display);font-size:22px;color:var(--accent)">${fmtVal(row.links_voor)}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--surface2);border-left:2px solid var(--border)">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Rechts voor</div>
+            <div style="font-family:var(--font-display);font-size:22px;color:var(--accent)">${fmtVal(row.rechts_voor)}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--surface2);border-top:2px solid var(--border)">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Links achter</div>
+            <div style="font-family:var(--font-display);font-size:22px;color:var(--accent)">${fmtVal(row.links_achter)}</div>
+          </div>
+          <div style="padding:10px 12px;background:var(--surface2);border-top:2px solid var(--border);border-left:2px solid var(--border)">
+            <div style="font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;margin-bottom:4px">Rechts achter</div>
+            <div style="font-family:var(--font-display);font-size:22px;color:var(--accent)">${fmtVal(row.rechts_achter)}</div>
+          </div>
+        </div>
+        <button onclick="deleteTirePressure(${row.id})" class="btn btn-ghost btn-sm" style="opacity:0.6">✕ Verwijderen</button>
+      </div>`).join('');
 
   } catch(e) {
     container.innerHTML = `<p style="color:var(--red)">Fout: ${e.message}</p>`;
@@ -108,3 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTirePressureHistory();
   }
 });
+
+
+// Opslaan mislukt: Could not find the 'Links_achter' column of 'tire_pressures' in the schema cache

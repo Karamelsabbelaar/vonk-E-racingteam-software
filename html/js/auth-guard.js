@@ -18,28 +18,19 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, {
   },
 });
 
-// Hide all content initially
-document.documentElement.style.opacity = '0';
-
 async function initAuth() {
   try {
     const { data: { session } } = await supabase.auth.getSession();
-    
     if (!session) {
-      // Redirect to login if not authenticated
-      window.location.href = 'login.html';
-      return;
+      window.location.replace('login.html');
     }
-
-    // User is authenticated, show content
-    document.documentElement.style.opacity = '1';
   } catch (error) {
     console.error('Auth check failed:', error);
-    window.location.href = 'login.html';
+    window.location.replace('login.html');
   }
 }
 
-// Initialize auth check
+// Initialize auth check (runs async in background — no opacity hiding)
 initAuth();
 
 // Export supabase client for use in other scripts
