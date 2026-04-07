@@ -7,6 +7,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script type="module">
+    import { supabase } from './js/auth-guard.js';
+    window.supabase = supabase;
+  </script>
   <style>
     :root {
       --bg:#ffffff; --bg2:#ececec; --bg3:#ebebeb; --card:#f8f8f8;
@@ -283,29 +287,25 @@
 
     // ── CONFIG — vervang met jouw Supabase gegevens ──────────
     const SUPABASE_URL        = 'https://tzzuxemddkgvgipsaadr.supabase.co';
-    const SUPABASE_ANON       = 'sb_publishable_hV5vJlRZn0MOwQFErJPbww_9605nepF';
-    // Service role key is nodig om gebruikers aan te maken via Admin API
+    const SUPABASE_ANON       = 'sb_publishable_hV5vJlRZn0APIMOwQFErJPbww_9605nepF';
+    // Service role key
     // Bewaar deze NOOIT in front-end productie code — gebruik een Edge Function!
     // Voor development/prototype kan je hem hier tijdelijk zetten.
-    const SUPABASE_SERVICE_KEY = 'jouw-service-role-key';
+    const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6enV4ZW1kZGtndmdpcHNhYWRyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzEzODEyMiwiZXhwIjoyMDg4NzE0MTIyfQ.wO3DfVbnxLBbNRfg4pnorwLmzPyNcO8AUxKKBjQWBS4';
     // ─────────────────────────────────────────────────────────
 
     const supabase      = createClient(SUPABASE_URL, SUPABASE_ANON);
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-    // ── Auth guard ──────────────────────────────────────────
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { window.location.href = 'login.html'; }
+// ── Auth guard ──────────────────────────────────────────
+const { data: { session } } = await supabase.auth.getSession();
+if (!session) { window.location.href = 'login.html'; }
 
-    const { data: myProfile } = await supabase
-      .from('profiles')
-      .select('role, full_name')
-      .eq('id', session.user.id)
-      .single();
+const role = session.user.app_metadata?.role;
 
-    if (!myProfile || myProfile.role !== 'admin') {
-      window.location.href = 'index.html';
-    }
+if (role !== 'admin') {
+  window.location.href = 'index.html';
+}
 
     document.getElementById('adminEmail').textContent = session.user.email;
 
@@ -335,48 +335,47 @@
 
     // ── Load users ───────────────────────────────────────────
     async function loadUsers() {
-      const tbody = document.getElementById('usersTableBody');
-      tbody.innerHTML = '<tr class="loading-row"><td colspan="5">Accounts laden…</td></tr>';
+  const tbody = document.getElementById('usersTableBody');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="5">Accounts laden…</td></tr>';
 
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers();
 
-      if (error) {
-        tbody.innerHTML = '<tr class="loading-row"><td colspan="5">Fout bij laden van accounts.</td></tr>';
-        return;
-      }
+  if (error) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="5">Fout bij laden van accounts.</td></tr>';
+    return;
+  }
 
-      // Update stats
-      document.getElementById('statTotal').textContent  = profiles.length;
-      document.getElementById('statUsers').textContent  = profiles.filter(p => p.role === 'user').length;
-      document.getElementById('statAdmins').textContent = profiles.filter(p => p.role === 'admin').length;
+  // Update stats
+  document.getElementById('statTotal').textContent  = users.length;
+  document.getElementById('statUsers').textContent  = users.filter(u => u.app_metadata?.role === 'user').length;
+  document.getElementById('statAdmins').textContent = users.filter(u => u.app_metadata?.role === 'admin').length;
 
-      if (!profiles.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Geen accounts gevonden</td></tr>';
-        return;
-      }
+  if (!users.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Geen accounts gevonden</td></tr>';
+    return;
+  }
 
-      tbody.innerHTML = profiles.map(p => {
-        const isMe = p.id === session.user.id;
-        const date = new Date(p.created_at).toLocaleDateString('nl-NL', { day:'2-digit', month:'short', year:'numeric' });
-        const badge = p.role === 'admin'
-          ? '<span class="badge badge-red">Admin</span>'
-          : '<span class="badge badge-gray">Gebruiker</span>';
+  tbody.innerHTML = users.map(u => {
+    const isMe = u.id === session.user.id;
+    const name = u.user_metadata?.full_name || '—';
+    const role = u.app_metadata?.role || 'user';
+    const date = new Date(u.created_at).toLocaleDateString('nl-NL', { day:'2-digit', month:'short', year:'numeric' });
+    const badge = role === 'admin'
+      ? '<span class="badge badge-red">Admin</span>'
+      : '<span class="badge badge-gray">Gebruiker</span>';
 
-        return `
-          <tr>
-            <td>${p.full_name || '—'} ${isMe ? '<span class="badge badge-green" style="margin-left:6px;">jij</span>' : ''}</td>
-            <td>${p.email || '—'}</td>
-            <td>${badge}</td>
-            <td>${date}</td>
-            <td style="text-align:right;">
-              ${!isMe ? `<button class="btn btn-danger btn-sm" onclick="promptDelete('${p.id}','${(p.email||'').replace(/'/g,"\\'")}')">Verwijderen</button>` : ''}
-            </td>
-          </tr>`;
-      }).join('');
-    }
+    return `
+      <tr>
+        <td>${name} ${isMe ? '<span class="badge badge-green" style="margin-left:6px;">jij</span>' : ''}</td>
+        <td>${u.email || '—'}</td>
+        <td>${badge}</td>
+        <td>${date}</td>
+        <td style="text-align:right;">
+          ${!isMe ? `<button class="btn btn-danger btn-sm" onclick="promptDelete('${u.id}','${(u.email||'').replace(/'/g,"\\'")}')">Verwijderen</button>` : ''}
+        </td>
+      </tr>`;
+  }).join('');
+}
 
     loadUsers();
     document.getElementById('refreshBtn').addEventListener('click', loadUsers);
@@ -407,39 +406,29 @@
       btn.disabled = true;
       btn.textContent = 'BEZIG…';
 
-      // Create user via Admin API
-      const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
+// Create user via Admin API
+const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+  email,
+  password,
+  email_confirm: true,
+  user_metadata: { full_name: name },
+  app_metadata: { role }
+});
 
-      if (createError) {
-        showCreateAlert('Fout: ' + createError.message, 'error');
-        btn.disabled = false;
-        btn.textContent = '+ AANMAKEN';
-        return;
-      }
+if (createError) {
+  showCreateAlert('Fout: ' + createError.message, 'error');
+  btn.disabled = false;
+  btn.textContent = '+ AANMAKEN';
+  return;
+}
 
-      // Insert profile row
-      const { error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .insert({ id: newUser.user.id, email, full_name: name, role });
-
-      btn.disabled = false;
-      btn.textContent = '+ AANMAKEN';
-
-      if (profileError) {
-        showCreateAlert('Account aangemaakt maar profiel mislukt: ' + profileError.message, 'error');
-        return;
-      }
-
-      showCreateAlert(`Account voor ${email} aangemaakt!`, 'success');
-      document.getElementById('newEmail').value    = '';
-      document.getElementById('newName').value     = '';
-      document.getElementById('newPassword').value = '';
-      document.getElementById('newRole').value     = 'user';
-      loadUsers();
+// No profile insert needed anymore
+showCreateAlert(`Account voor ${email} aangemaakt!`, 'success');
+document.getElementById('newEmail').value    = '';
+document.getElementById('newName').value     = '';
+document.getElementById('newPassword').value = '';
+document.getElementById('newRole').value     = 'user';
+loadUsers();
     });
 
     // ── Delete account ────────────────────────────────────────
