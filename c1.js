@@ -1,14 +1,10 @@
 /**
- * KartPit — Shared utilities
+ * KartPit — Gedeelde utilities
  */
 
 // ── Service Worker ─────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-<<<<<<< HEAD
-  navigator.serviceWorker.register('../js/sw.js', { scope: './' })
-=======
   navigator.serviceWorker.register('../sw.js', { scope: './' })
->>>>>>> d3cad5143919ff421d522a41f79149df9a6e0a08
     .catch(() => {}); // silently fail in non-HTTPS dev environments
 }
 
@@ -92,33 +88,25 @@ function initBackTransition() {
     }
   }
 
+  // r,o,w — the rest is up to you
+  const _seq = ['r','o','w','r','o','w'];
+  let _i = 0;
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    _i = (e.key === _seq[_i]) ? _i + 1 : (e.key === _seq[0] ? 1 : 0);
+    if (_i < _seq.length) return;
+    _i = 0;
+    _gurrenTrigger();
+  });
 
-<<<<<<< HEAD
-=======
-  // mobile: press all 4 corners within 4 seconds
-  const _CORNER = 90; // px from each edge counts as a corner
-  let _cornersHit = new Set();
-  let _cornerTimer = null;
-  document.addEventListener('touchstart', e => {
-    const touch = e.touches[0];
-    const x = touch.clientX, y = touch.clientY;
-    const w = window.innerWidth,  h = window.innerHeight;
-    let corner = null;
-    if (x < _CORNER && y < _CORNER)             corner = 'tl';
-    else if (x > w - _CORNER && y < _CORNER)    corner = 'tr';
-    else if (x < _CORNER && y > h - _CORNER)    corner = 'bl';
-    else if (x > w - _CORNER && y > h - _CORNER) corner = 'br';
-    if (!corner) return;
-    if (!_cornersHit.size) {
-      clearTimeout(_cornerTimer);
-      _cornerTimer = setTimeout(() => { _cornersHit.clear(); }, 4000);
-    }
-    _cornersHit.add(corner);
-    if (_cornersHit.size >= 4) {
-      _cornersHit.clear();
-      clearTimeout(_cornerTimer);
-      _gurrenTrigger();
-    }
+  // mobile: tap the page footer/logo 6 times quickly
+  let _taps = 0, _tapTimer;
+  document.addEventListener('touchend', e => {
+    if (e.target.closest('input,textarea,button,a')) return;
+    _taps++;
+    clearTimeout(_tapTimer);
+    _tapTimer = setTimeout(() => { _taps = 0; }, 800);
+    if (_taps >= 6) { _taps = 0; _gurrenTrigger(); }
   }, { passive: true });
 }
 
@@ -130,7 +118,6 @@ function _gurrenTrigger() {
   console.log('%c🌀', 'font-size:48px');
   console.groupEnd();
   Toast.show('Don\'t believe in yourself!\nBelieve in me!\nBelieve in the Kamina who believes in you! ⚡', 'success gurren', 5000);
->>>>>>> d3cad5143919ff421d522a41f79149df9a6e0a08
 }
 
 // ── Dark Mode ──────────────────────────────────────────────────
@@ -214,18 +201,12 @@ function initNumberSteppers() {
 }
 
 // ── Hamburger Menu ─────────────────────────────────────────────
-// Toggles side navigation on mobile—handles open/close states and accessibility
 function initHamburgerMenu() {
   const btn      = document.getElementById('hamburgerBtn');
   const menu     = document.getElementById('sideMenu');
   const backdrop = document.getElementById('menuBackdrop');
-  if (!btn || !menu || !backdrop) {
-    console.warn('[KartPit] Hamburger menu: missing DOM elements');
-    return;
-  }
-  
+  if (!btn || !menu || !backdrop) return;
   const open = () => {
-    console.debug('[KartPit] Opening side menu');
     btn.classList.add('open');
     menu.classList.add('open');
     backdrop.classList.add('open');
@@ -233,9 +214,7 @@ function initHamburgerMenu() {
     btn.setAttribute('aria-expanded', 'true');
     document.body.style.overflow = 'hidden';
   };
-  
   const close = () => {
-    console.debug('[KartPit] Closing side menu');
     btn.classList.remove('open');
     menu.classList.remove('open');
     backdrop.classList.remove('open');
@@ -243,7 +222,6 @@ function initHamburgerMenu() {
     btn.setAttribute('aria-expanded', 'false');
     document.body.style.overflow = '';
   };
-  
   btn.addEventListener('click', () => btn.classList.contains('open') ? close() : open());
   backdrop.addEventListener('click', close);
   document.getElementById('menuClose')?.addEventListener('click', close);
@@ -251,54 +229,29 @@ function initHamburgerMenu() {
 }
 
 // ── Global Sign Out ─────────────────────────────────────────────
-// Logs user out and redirects to login page
 async function signOutGlobal() {
-  try {
-    if (typeof db !== 'undefined') {
-      console.log('[KartPit] Signing out user...');
-      await db.auth.signOut();
-    }
-  } catch(e) {
-    console.error('[KartPit] Error during sign out:', e.message);
-  }
-  // Redirect to login regardless of Supabase outcome
+  try { if (typeof db !== 'undefined') await db.auth.signOut(); } catch(_) {}
   window.location.href = 'login.html';
 }
 
 // ── Admin nav link (only shown to admins) ──────────────────────
-// Dynamically injects admin panel link if user has admin privileges
 async function initAdminLink() {
   try {
-    if (typeof db === 'undefined') {
-      console.debug('[KartPit] Auth not available, skipping admin link');
-      return;
-    }
+    if (typeof db === 'undefined') return;
     const { data: { session } } = await db.auth.getSession();
-    if (!session?.user?.app_metadata?.role || session.user.app_metadata.role !== 'admin') {
-      return; // niet admin, geen link nodig
-    }
+    if (session?.user?.app_metadata?.role !== 'admin') return;
     const nav = document.querySelector('.side-menu-nav');
-    if (!nav) {
-      console.warn('[KartPit] Could not find side menu nav for admin link');
-      return;
-    }
-    if (nav.querySelector('a[href="admin.html"]')) {
-      return; // al aanwezig
-    }
-    console.log('[KartPit] Adding admin link for user:', session.user.email);
+    if (!nav || nav.querySelector('a[href="admin.html"]')) return;
     const li = document.createElement('li');
     li.innerHTML = `<a href="admin.html" class="side-menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Accountbeheer</a>`;
     nav.appendChild(li);
-  } catch(e) {
-    console.error('[KartPit] Error initializing admin link:', e);
-  }
+  } catch(_) {}
 }
 
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   document.documentElement.classList.remove('preload');
   initTheme();
-  OfflineSync.initialize();
   initHamburgerMenu();
   Modal.init();
   setActiveNav();
@@ -306,22 +259,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdminLink();
   initNumberSteppers();
 
-  // Hide status bar on Android — only on Capacitor, not in browser
+  // Fullscreen: hide status bar — only on Capacitor (Android), not in browser
   if (window.Capacitor && document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(() => {});
   }
 });
 
-<<<<<<< HEAD
-// ── Tracks ────────────────────────────────────────────────────
-// Renders track list from database with type badges and quick delete
-async function renderTracks() {
-  const TYPE_BADGE = { indoor: 'badge-blue', outdoor: 'badge-green' };
-  const grid = document.getElementById('tracks-grid');
-  if (!grid) {
-    console.warn('[KartPit] tracks-grid element not found');
-    return;
-=======
 // Tracks toevoegen //
   async function renderTracks() {
     const TYPE_BADGE = { indoor: 'badge-blue', outdoor: 'badge-green' };
@@ -341,7 +284,7 @@ async function renderTracks() {
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
               <span class="badge ${TYPE_BADGE[t.type] || 'badge-yellow'}">${t.type}</span>
-              <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.6">✕</button>
+              <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.4">✕</button>
             </div>
           </div>
           <div class="track-body">
@@ -354,132 +297,61 @@ async function renderTracks() {
     } catch(e) {
       grid.innerHTML = `<p style="color:var(--red)">Fout: ${e.message}</p>`;
     }
->>>>>>> d3cad5143919ff421d522a41f79149df9a6e0a08
   }
-  
-  try {
-    const data = await Tracks.getAll();
-    console.log(`[KartPit] Loaded ${data.length} tracks`);
-    
-    if (!data.length) {
-      grid.innerHTML = '<p style="color:var(--text3)">Nog geen tracks — voeg er een toe.</p>';
-      return;
-    }
-    
-    grid.innerHTML = data.map(t => `
-      <div class="track-card">
-        <div class="track-header">
-          <div>
-            <div class="track-name">${t.name}</div>
-            <div style="font-size:13px;color:var(--text3);margin-top:2px">${t.location}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-            <span class="badge ${TYPE_BADGE[t.type] || 'badge-yellow'}">${t.type}</span>
-            <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.4">x</button>
-          </div>
-        </div>
-        <div class="track-body">
-          <div class="track-stat"><span class="track-stat-label">Lengte</span><span class="track-stat-value">${t.length_m}m</span></div>
-          <div class="track-stat"><span class="track-stat-label">Bochten</span><span class="track-stat-value">${t.turns}</span></div>
-          <div class="track-stat"><span class="track-stat-label">Datum</span><span class="track-stat-value" style="color:var(--yellow)">${t.track_date}</span></div>
-          ${t.notes ? `<div class="track-notes">${t.notes}</div>` : ''}
-        </div>
-      </div>`).join('');
-  } catch(e) {
-    console.error('[KartPit] Error rendering tracks:', e);
-    grid.innerHTML = `<p style="color:var(--red)">Fout bij laden tracks: ${e.message}</p>`;
-  }
-}
 
-// Add new track to database and refresh list
-async function addTrack() {
-  const getVal = id => {
-    const el = document.getElementById(id);
-    return el ? el.value : '';
-  };
-  
-  const name = getVal('tr-name').trim();
-  if (!name) {
-    Toast.show('Tracknaam is verplicht', 'error');
-    document.getElementById('tr-name')?.focus();
-    return;
-  }
-  
-  try {
-    const trackData = {
-      name,
-      location: getVal('tr-loc'),
-      length_m: parseInt(getVal('tr-len')) || 0,
-      turns: parseInt(getVal('tr-turns')) || 0,
-      track_date: getVal('tr-date') || '–',
-      type: getVal('tr-type'),
-      notes: getVal('tr-notes'),
-      layout: getVal('tr-layout') || '–'
-    };
-    
-    console.log('[KartPit] Adding track:', trackData.name);
-    await Tracks.add(trackData);
-    
-    // Clear form
-    ['tr-name', 'tr-loc', 'tr-len', 'tr-turns', 'tr-date', 'tr-notes', 'tr-type', 'tr-layout']
-      .forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = '';
+  async function addTrack() {
+    const get = id => document.getElementById(id).value;
+    const name = get('tr-name').trim();
+    if (!name) { Toast.show('Tracknaam is verplicht', 'error'); return; }
+    try {
+      await Tracks.add({
+        name,
+        location: get('tr-loc'),
+        length_m: parseInt(get('tr-len')) || 0,
+        turns:    parseInt(get('tr-turns')) || 0,
+        track_date:get('tr-date') || '–',
+        type:     get('tr-type'),
+        notes:    get('tr-notes'),
+        layout:    get('tr-layout') || '–' 
+
       });
-    
-    Toast.show('Track toegevoegd: ' + name, 'success');
-    renderTracks();
-  } catch(e) {
-    console.error('[KartPit] Error adding track:', e);
-    Toast.show('Fout bij toevoegen: ' + e.message, 'error');
+      ['tr-name','tr-loc','tr-len','tr-turns','tr-date','tr-notes'].forEach(id => document.getElementById(id).value = '');
+      Toast.show('Track toegevoegd', 'success');
+      renderTracks();
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
   }
-}
 
-// Remove track from database
-async function deleteTrack(id) {
-  if (!confirm('Weet je zeker dat je deze track wilt verwijderen?')) {
-    return;
+  async function deleteTrack(id) {
+    if (!confirm('Track verwijderen?')) return;
+    try {
+      await Tracks.remove(id);
+      Toast.show('Track verwijderd', 'success');
+      renderTracks();
+    } catch(e) {
+      Toast.show('Fout: ' + e.message, 'error');
+    }
   }
-  
-  try {
-    console.log('[KartPit] Deleting track ID:', id);
-    await Tracks.remove(id);
-    Toast.show('Track verwijderd', 'success');
-    renderTracks();
-  } catch(e) {
-    console.error('[KartPit] Error deleting track:', e);
-    Toast.show('Kon track niet verwijderen: ' + e.message, 'error');
-  }
-}
 
   document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('tracks-grid')) renderTracks();
   });
 
 // ── Agenda preview (homepage) ──────────────────────────────────
-// Load upcoming events and display in compact table (max 5 items)
 async function loadAgendaPreview() {
   const tbody = document.getElementById('agenda-preview');
-  if (!tbody) {
-    console.debug('[KartPit] Agenda preview container not found—probably not on homepage');
-    return;
-  }
-  
+  if (!tbody) return;
   const TYPE_BADGE = {
     race: 'badge-red', qualifying: 'badge-yellow',
     session: 'badge-blue', pitstop: 'badge-green'
   };
-  
   try {
     const agenda = await Agenda.getAll();
-    console.log(`[KartPit] Loaded ${agenda.length} agenda items`);
-    
     if (!agenda.length) {
       tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text3);text-align:center;padding:24px">Geen events gepland</td></tr>';
       return;
     }
-    
-    // Show only first 5 items
     tbody.innerHTML = agenda.slice(0, 5).map(item => `
       <tr>
         <td style="font-family:var(--font-display);font-size:18px;color:var(--text2)">${item.time}</td>
@@ -487,8 +359,7 @@ async function loadAgendaPreview() {
         <td><span class="badge ${TYPE_BADGE[item.type] || 'badge-gray'}">${item.type}</span></td>
       </tr>`).join('');
   } catch(e) {
-    console.error('[KartPit] Error loading agenda preview:', e);
-    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--red)">Fout bij laden: ${e.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" style="color:var(--red)">Fout: ${e.message}</td></tr>`;
   }
 }
 
