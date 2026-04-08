@@ -102,15 +102,11 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   from { opacity: 1; transform: translateX(0); }
   to   { opacity: 0; transform: translateX(16px); }
 }
-@keyframes checker-scroll {
-  from { background-position: 0 0; }
-  to   { background-position: 40px 40px; }
-}
 
 /* ── Layout ─────────────────────────────────────────────────── */
 .wrapper { display: flex; flex-direction: column; min-height: 100vh; animation: page-enter .13s ease both; position: relative; }
 .wrapper.exiting { animation: page-exit .10s ease both; }
-.wrapper::before { content: ''; position: absolute; inset: 0; background: repeating-conic-gradient(rgba(0,0,0,.008) 0% 25%, transparent 0% 50%) 0 0/60px 60px; animation: checker-scroll 8s linear infinite; pointer-events: none; z-index: 0; }
+.wrapper::before { content: ''; position: absolute; inset: 0; background: repeating-conic-gradient(rgba(0,0,0,.008) 0% 25%, transparent 0% 50%) 0 0/60px 60px; pointer-events: none; z-index: 0; }
 [data-theme="dark"] .wrapper::before { background: repeating-conic-gradient(rgba(255,255,255,.004) 0% 25%, transparent 0% 50%) 0 0/60px 60px; }
 .wrapper > * { position: relative; z-index: 1; }
 

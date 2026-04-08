@@ -7,6 +7,11 @@
  *  - Schrijfacties die mislukken worden in een wachtrij gezet en automatisch
  *    opnieuw verstuurd zodra de verbinding terugkomt.
  *
+ * Waarom zo ingewikkeld?
+ *  - Racedag gaat door, ook zonder internet. App mag NIET crashen.
+ *  - Offline functies moeten voelen als normaal gebruiken (geen "you're offline" dialogs).
+ *  - Sync happens automagically — user shouldn't notice de achterstand.
+ *
  * Nieuw module/tabel toevoegen:
  *  1. Roep VOOR OfflineSync.init() aan:
  *       OfflineSync.registerTable('jouw_tabel', {
@@ -30,7 +35,7 @@
 
 const OfflineSync = (() => {
   const DB_NAME = 'kartpit';
-  const DB_VER  = 2;   // verhoog bij elke nieuwe tabel
+  const DB_VER  = 3;   // verhoog bij elke nieuwe tabel
   let _idb    = null;
   let _online = navigator.onLine;
 
@@ -337,7 +342,14 @@ const OfflineSync = (() => {
   }
 
   async function init() {
-    await openIDB();
+    console.log('[KartPit Offline] Initializing offline sync...');
+    try {
+      await openIDB();
+      console.log('[KartPit Offline] IndexedDB opened successfully');
+    } catch(e) {
+      console.error('[KartPit Offline] Failed to open IndexedDB:', e);
+      _online = false;
+    }
 
     const banner = document.createElement('div');
     banner.id        = 'sync-banner';
@@ -345,20 +357,34 @@ const OfflineSync = (() => {
     document.body.prepend(banner);
 
     try {
+      console.log('[KartPit Offline] Attempting initial sync...');
       await _doSync();
-    } catch {
+      console.log('[KartPit Offline] Initial sync completed');
+    } catch(e) {
+      console.warn('[KartPit Offline] Initial sync failed, operating in offline mode:', e.message);
       _online = false;
       showBanner('offline');
     }
 
     window.addEventListener('offline', () => {
+      console.warn('[KartPit Offline] Connection lost');
       _online = false;
       showBanner('offline');
     });
 
     window.addEventListener('online', async () => {
+      console.log('[KartPit Offline] Connection restored, syncing...');
       _online = true;
-      try { await _doSync(); } catch { /* stil falen */ }
+      showBanner('syncing');
+      try {
+        await _doSync();
+        console.log('[KartPit Offline] Sync completed after reconnection');
+        showBanner('hidden');
+      } catch(e) {
+        console.error('[KartPit Offline] Sync failed after reconnection:', e.message);
+        // Hmm, still having issues. Try again in a moment.
+        setTimeout(() => { location.reload(); }, 3000);
+      }
     });
   }
 
@@ -422,6 +448,14 @@ OfflineSync.registerTable('tracks', {
 });
 OfflineSync.registerRefreshHandler('tracks',
   () => typeof renderTracks === 'function' && renderTracks(),
+);
+
+OfflineSync.registerTable('tasks', {
+  query: () => db.from('tasks').select('*').order('created_at', { ascending: false }),
+  sort:  (a, b) => new Date(b.created_at) - new Date(a.created_at),
+});
+OfflineSync.registerRefreshHandler('tasks',
+  () => typeof renderTasks === 'function' && renderTasks(),
 );
 
 // =================================================================
@@ -521,6 +555,39 @@ Object.assign(Tracks, {
         await OfflineSync.idbPut('tracks', { id: OfflineSync._tempId(), ...track });
         await OfflineSync.enqueue({ table: 'tracks', op: 'insert', data: track });
         OfflineSync._notifyRefresh('tracks');
+        return;
+      }
+      throw e;
+    }
+  },
+});
+
+// --- Tasks -------------------------------------------------------
+const _rawTasks = OfflineSync.makeOfflineWrapper(Tasks, 'tasks');
+Object.assign(Tasks, {
+  async add(description, person, category) {
+    try { await _rawTasks.add(description, person, category); } catch (e) {
+      if (OfflineSync.isNetworkError(e)) {
+        await OfflineSync.idbPut('tasks', {
+          id: OfflineSync._tempId(), description, person, category, done: false,
+          created_at: new Date().toISOString(),
+        });
+        await OfflineSync.enqueue({ table: 'tasks', op: 'insert', data: { description, person, category, done: false } });
+        OfflineSync._notifyRefresh('tasks');
+        return;
+      }
+      throw e;
+    }
+  },
+
+  async setDone(id, done) {
+    try {
+      await _rawTasks.setDone(id, done);
+      await OfflineSync.idbUpdate('tasks', id, { done });
+    } catch (e) {
+      if (OfflineSync.isNetworkError(e)) {
+        await OfflineSync.idbUpdate('tasks', id, { done });
+        await OfflineSync.enqueue({ table: 'tasks', op: 'update', data: { done }, filter: { id } });
         return;
       }
       throw e;
