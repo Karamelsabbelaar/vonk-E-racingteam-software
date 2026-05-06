@@ -4,11 +4,7 @@
 
 // ── Service Worker ─────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-<<<<<<< HEAD
   navigator.serviceWorker.register('../js/sw.js', { scope: './' })
-=======
-  navigator.serviceWorker.register('../sw.js', { scope: './' })
->>>>>>> d3cad5143919ff421d522a41f79149df9a6e0a08
     .catch(() => {}); // silently fail in non-HTTPS dev environments
 }
 
@@ -93,44 +89,6 @@ function initBackTransition() {
   }
 
 
-<<<<<<< HEAD
-=======
-  // mobile: press all 4 corners within 4 seconds
-  const _CORNER = 90; // px from each edge counts as a corner
-  let _cornersHit = new Set();
-  let _cornerTimer = null;
-  document.addEventListener('touchstart', e => {
-    const touch = e.touches[0];
-    const x = touch.clientX, y = touch.clientY;
-    const w = window.innerWidth,  h = window.innerHeight;
-    let corner = null;
-    if (x < _CORNER && y < _CORNER)             corner = 'tl';
-    else if (x > w - _CORNER && y < _CORNER)    corner = 'tr';
-    else if (x < _CORNER && y > h - _CORNER)    corner = 'bl';
-    else if (x > w - _CORNER && y > h - _CORNER) corner = 'br';
-    if (!corner) return;
-    if (!_cornersHit.size) {
-      clearTimeout(_cornerTimer);
-      _cornerTimer = setTimeout(() => { _cornersHit.clear(); }, 4000);
-    }
-    _cornersHit.add(corner);
-    if (_cornersHit.size >= 4) {
-      _cornersHit.clear();
-      clearTimeout(_cornerTimer);
-      _gurrenTrigger();
-    }
-  }, { passive: true });
-}
-
-function _gurrenTrigger() {
-  // ???%
-  console.groupCollapsed('%c⚡ ROW ROW FIGHT THE POWER ⚡', 'color:#ffd700;font-weight:bold;font-size:15px');
-  console.log('%c"Don\'t believe in yourself!\nBelieve in me!\nBelieve in the Kamina who believes in you!"\n — Kamina, Gurren Lagann', 'color:#f0a500;font-family:monospace;font-size:13px');
-  console.log('%c"At ???%... I surpass my limits."\n — Shigeo Kageyama, Mob Psycho 100', 'color:#9b59b6;font-family:monospace');
-  console.log('%c🌀', 'font-size:48px');
-  console.groupEnd();
-  Toast.show('Don\'t believe in yourself!\nBelieve in me!\nBelieve in the Kamina who believes in you! ⚡', 'success gurren', 5000);
->>>>>>> d3cad5143919ff421d522a41f79149df9a6e0a08
 }
 
 // ── Dark Mode ──────────────────────────────────────────────────
@@ -298,13 +256,11 @@ async function initAdminLink() {
 document.addEventListener('DOMContentLoaded', () => {
   document.documentElement.classList.remove('preload');
   initTheme();
-  OfflineSync.initialize();
   initHamburgerMenu();
   Modal.init();
   setActiveNav();
   initBackTransition();
   initAdminLink();
-  initNumberSteppers();
 
   // Hide status bar on Android — only on Capacitor, not in browser
   if (window.Capacitor && document.documentElement.requestFullscreen) {
@@ -312,16 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-<<<<<<< HEAD
-// ── Tracks ────────────────────────────────────────────────────
-// Renders track list from database with type badges and quick delete
-async function renderTracks() {
-  const TYPE_BADGE = { indoor: 'badge-blue', outdoor: 'badge-green' };
-  const grid = document.getElementById('tracks-grid');
-  if (!grid) {
-    console.warn('[KartPit] tracks-grid element not found');
-    return;
-=======
 // Tracks toevoegen //
   async function renderTracks() {
     const TYPE_BADGE = { indoor: 'badge-blue', outdoor: 'badge-green' };
@@ -354,42 +300,7 @@ async function renderTracks() {
     } catch(e) {
       grid.innerHTML = `<p style="color:var(--red)">Fout: ${e.message}</p>`;
     }
->>>>>>> d3cad5143919ff421d522a41f79149df9a6e0a08
   }
-  
-  try {
-    const data = await Tracks.getAll();
-    console.log(`[KartPit] Loaded ${data.length} tracks`);
-    
-    if (!data.length) {
-      grid.innerHTML = '<p style="color:var(--text3)">Nog geen tracks — voeg er een toe.</p>';
-      return;
-    }
-    
-    grid.innerHTML = data.map(t => `
-      <div class="track-card">
-        <div class="track-header">
-          <div>
-            <div class="track-name">${t.name}</div>
-            <div style="font-size:13px;color:var(--text3);margin-top:2px">${t.location}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-            <span class="badge ${TYPE_BADGE[t.type] || 'badge-yellow'}">${t.type}</span>
-            <button onclick="deleteTrack(${t.id})" class="btn btn-ghost btn-sm" style="opacity:0.4">x</button>
-          </div>
-        </div>
-        <div class="track-body">
-          <div class="track-stat"><span class="track-stat-label">Lengte</span><span class="track-stat-value">${t.length_m}m</span></div>
-          <div class="track-stat"><span class="track-stat-label">Bochten</span><span class="track-stat-value">${t.turns}</span></div>
-          <div class="track-stat"><span class="track-stat-label">Datum</span><span class="track-stat-value" style="color:var(--yellow)">${t.track_date}</span></div>
-          ${t.notes ? `<div class="track-notes">${t.notes}</div>` : ''}
-        </div>
-      </div>`).join('');
-  } catch(e) {
-    console.error('[KartPit] Error rendering tracks:', e);
-    grid.innerHTML = `<p style="color:var(--red)">Fout bij laden tracks: ${e.message}</p>`;
-  }
-}
 
 // Add new track to database and refresh list
 async function addTrack() {
