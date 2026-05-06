@@ -446,7 +446,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   padding: 3px 9px;
   border-radius: 2px;
 }
-.badge-red    { background: var(--red-dim);        color: #ff6680; }
+.badge-red    { background: var(--red-dim);        color: #fbff00; }
 .badge-yellow { background: var(--yellow-dim);     color: var(--yellow); }
 .badge-green  { background: var(--green-dim);      color: var(--green); }
 .badge-blue   { background: rgba(0,144,212,.15);   color: var(--blue); }
@@ -1181,7 +1181,6 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   flex-direction: column;
   transform: translateX(100%);
   transition: transform .28s cubic-bezier(.4,0,.2,1);
-  box-shadow: -12px 0 48px rgba(0,0,0,.5);
 }
 .side-menu.open { transform: translateX(0); }
 
