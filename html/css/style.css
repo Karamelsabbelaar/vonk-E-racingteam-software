@@ -446,7 +446,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   padding: 3px 9px;
   border-radius: 2px;
 }
-.badge-red    { background: var(--red-dim);        color: #ff6680; }
+.badge-red    { background: var(--red-dim);        color: #fbff00; }
 .badge-yellow { background: var(--yellow-dim);     color: var(--yellow); }
 .badge-green  { background: var(--green-dim);      color: var(--green); }
 .badge-blue   { background: rgba(0,144,212,.15);   color: var(--blue); }
@@ -1181,7 +1181,6 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
   flex-direction: column;
   transform: translateX(100%);
   transition: transform .28s cubic-bezier(.4,0,.2,1);
-  box-shadow: -12px 0 48px rgba(0,0,0,.5);
 }
 .side-menu.open { transform: translateX(0); }
 
@@ -1262,3 +1261,720 @@ input:focus, textarea:focus, select:focus { border-color: var(--red); }
 .sign-out-item { color: var(--text3); }
 .sign-out-item:hover { color: #ff3d5a !important; background: rgba(255,61,90,.07) !important; border-left-color: rgba(255,61,90,.4) !important; }
 .sign-out-item:hover svg { color: #ff3d5a !important; }
+
+
+/* ═══════════════════════════════════════════════════════════════
+   LAPTIMER PAGINA
+   Specifieke stijlen voor de rondetimer (laptimer.html)
+   Gebruikt dezelfde variabelen en fonts als KartPit main style
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Laptimer: dark mode header glow ───────────────────────── */
+[data-theme="dark"] header.laptimer-header {
+  box-shadow: 0 2px 32px rgba(248,171,33,0.35);
+}
+
+/* ── Laptimer: header ───────────────────────────────────────── */
+header.laptimer-header {
+  background:    var(--bg2);
+  border-bottom: 2px solid var(--red);
+  box-shadow:    0 2px 20px rgba(248,171,33,0.15);
+  position:      sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+
+.logo-area {
+  display:     flex;
+  align-items: center;
+  gap:         12px;
+}
+
+.session-info {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color:          var(--text3);
+  border:         1px solid var(--border2);
+  padding:        6px 14px;
+  border-radius:  var(--radius);
+  transition:     color .2s, border-color .2s, box-shadow .2s;
+  float: left;
+}
+.session-info.active {
+  color:        var(--green);
+  border-color: var(--green);
+  box-shadow:   0 0 10px rgba(0,200,83,0.25);
+}
+
+/* ── Laptimer: main layout ──────────────────────────────────── */
+main.laptimer-main {
+  max-width: 860px;
+  margin:    0 auto;
+  padding:   32px 24px 60px;
+  display:   flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Laptimer: timer card ───────────────────────────────────── */
+.timer-section {
+  background:    var(--card);
+  border:        1px solid var(--border);
+  border-top:    3px solid var(--red);
+  border-radius: var(--radius-lg);
+  padding:       32px 28px 24px;
+  box-shadow:    var(--shadow);
+  text-align:    center;
+  position:      relative;
+  overflow:      hidden;
+}
+
+/* grid texture matching KartPit wrapper */
+.timer-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-conic-gradient(rgba(0,0,0,.006) 0% 25%, transparent 0% 50%) 0 0/40px 40px;
+  pointer-events: none;
+}
+[data-theme="dark"] .timer-section::before {
+  background: repeating-conic-gradient(rgba(255,255,255,.003) 0% 25%, transparent 0% 50%) 0 0/40px 40px;
+}
+
+.timer-label {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color:          var(--text3);
+  margin-bottom:  6px;
+  position:       relative;
+}
+
+/* Override: laptimer timer-display is bigger and uses pink text color */
+.timer-section .timer-display {
+  font-size:     clamp(3.5rem, 11vw, 6rem);
+  letter-spacing: 4px;
+  color:         var(--text);
+  line-height:   1;
+  margin-bottom: 8px;
+  padding:       0;           /* reset the generic padding: 40px 0 from main style */
+  text-align:    center;
+  position:      relative;
+  transition:    color .2s, text-shadow .2s;
+}
+
+.timer-section .timer-display.running {
+  color:     var(--text);     /* keep pink; generic rule sets green — override */
+  animation: laptimer-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes laptimer-pulse {
+  0%, 100% { text-shadow: none; }
+  50%       { text-shadow: 0 0 28px rgba(229,0,117,0.45); }
+}
+
+[data-theme="dark"] .timer-section .timer-display.running {
+  animation: laptimer-pulse-dark 1.6s ease-in-out infinite;
+}
+
+@keyframes laptimer-pulse-dark {
+  0%, 100% { text-shadow: none; }
+  50%       { text-shadow: 0 0 28px rgba(255,38,148,0.55); }
+}
+
+.total-label {
+  font-family:     var(--font-ui);
+  font-size:       11px;
+  font-weight:     600;
+  letter-spacing:  2px;
+  color:           var(--text3);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             8px;
+  position:        relative;
+}
+#totalDisplay {
+  font-family:    var(--font-ui);
+  font-size:      14px;
+  font-weight:    600;
+  color:          var(--text2);
+  letter-spacing: 1px;
+}
+
+/* ── Info boxes ─────────────────────────────────────────────── */
+.lap-info-row {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:                   12px;
+  margin-top:            20px;
+  position:              relative;
+}
+
+.info-box {
+  background:     var(--bg3);
+  border:         1px solid var(--border);
+  border-radius:  var(--radius);
+  padding:        14px 8px;
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            4px;
+}
+
+.info-label {
+  font-family:    var(--font-ui);
+  font-size:      9px;
+  font-weight:    700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color:          var(--text3);
+}
+
+.info-value {
+  font-family:    var(--font-display);
+  font-size:      1.4rem;
+  letter-spacing: 1px;
+  color:          var(--text2);
+}
+.info-value.best   { color: var(--yellow); }
+.info-value.faster { color: var(--green);  }
+.info-value.slower { color: #ff3d5a;       }
+
+/* ── Laptimer controls ──────────────────────────────────────── */
+.laptimer-controls {
+  display:               grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap:                   12px;
+}
+
+.btn-start {
+  background:   transparent;
+  border-color: var(--green);
+  color:        var(--green);
+}
+.btn-start:hover {
+  background: rgba(0,200,83,0.1);
+  box-shadow: 0 0 14px rgba(0,200,83,0.3);
+}
+
+.btn-lap {
+  background:   var(--red);
+  border-color: var(--red);
+  color:        #0a0a0a;
+}
+.btn-lap:hover {
+  background:   var(--red-dim);
+  border-color: var(--red-dim);
+  box-shadow:   0 0 18px rgba(248,171,33,0.45);
+}
+.btn-lap:active { transform: scale(0.97); }
+
+.btn-stop {
+  background:   transparent;
+  border-color: #ff3d5a;
+  color:        #ff3d5a;
+}
+.btn-stop:hover {
+  background: rgba(255,61,90,0.1);
+  box-shadow: 0 0 14px rgba(255,61,90,0.3);
+}
+
+/* ── Rondetabel ─────────────────────────────────────────────── */
+.table-section {
+  background:    var(--card);
+  border:        1px solid var(--border);
+  border-top:    3px solid var(--red);
+  border-radius: var(--radius-lg);
+  box-shadow:    var(--shadow);
+  overflow:      hidden;
+}
+
+.table-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         14px 20px;
+  border-bottom:   1px solid var(--border);
+  background:      var(--bg2);
+}
+.table-header h2 {
+  font-family:    var(--font-display);
+  font-size:      22px;
+  letter-spacing: 3px;
+  color:          var(--text);
+}
+
+.btn-export {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding:        7px 14px;
+  background:     transparent;
+  border:         1px solid var(--yellow);
+  color:          var(--yellow);
+  border-radius:  var(--radius);
+  cursor:         pointer;
+  transition:     background .18s, box-shadow .18s;
+}
+.btn-export:not(:disabled):hover {
+  background: rgba(255,215,0,0.1);
+  box-shadow: 0 0 12px rgba(255,215,0,0.3);
+}
+.btn-export:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.table-wrap { overflow-x: auto; }
+
+/* Laptimer table uses a regular <table>, not .data-table */
+.table-section table { width: 100%; border-collapse: collapse; }
+
+.table-section thead th {
+  font-family:    var(--font-ui);
+  font-size:      10px;
+  font-weight:    700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color:          var(--text3);
+  padding:        10px 16px;
+  text-align:     left;
+  border-bottom:  1px solid var(--border);
+  white-space:    nowrap;
+  background:     var(--bg2);
+}
+
+.table-section tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition:    background .15s;
+}
+.table-section tbody tr:last-child { border-bottom: none; }
+.table-section tbody tr:hover { background: rgba(248,171,33,0.05); }
+
+.table-section tbody td {
+  font-family: var(--font-ui);
+  font-size:   15px;
+  font-weight: 400;
+  padding:     12px 16px;
+  color:       var(--text2);
+}
+.table-section tbody td:first-child {
+  font-family:    var(--font-display);
+  font-size:      18px;
+  letter-spacing: 1px;
+  color:          var(--text3);
+}
+.table-section tbody td:nth-child(2) {
+  font-family:    var(--font-display);
+  font-size:      20px;
+  letter-spacing: 1px;
+  color:          var(--text);
+}
+
+tr.best-row td:nth-child(2) {
+  color:       var(--yellow);
+  text-shadow: 0 0 10px rgba(255,215,0,0.35);
+}
+
+.empty-row td {
+  text-align:     center;
+  color:          var(--text3);
+  font-family:    var(--font-ui);
+  font-size:      13px;
+  letter-spacing: 1.5px;
+  padding:        40px;
+}
+
+/* ── Lap badges ─────────────────────────────────────────────── */
+/* Note: .badge base is already defined in main style above.
+   These are the laptimer-specific variants that don't conflict. */
+.badge-best   { background: rgba(255,215,0,0.12);  border: 1px solid var(--yellow); color: var(--yellow); }
+.badge-fast   { background: rgba(0,200,83,0.1);    border: 1px solid var(--green);  color: var(--green);  }
+.badge-slow   { background: rgba(255,61,90,0.1);   border: 1px solid #ff3d5a;       color: #ff3d5a;       }
+.badge-normal { background: rgba(248,171,33,0.07); border: 1px solid var(--border2);color: var(--text3);  }
+
+.diff-fast { color: var(--green); }
+.diff-slow { color: #ff3d5a; }
+
+/* ── Nieuwe rij animatie ─────────────────────────────────────── */
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-10px); background: rgba(248,171,33,0.08); }
+  to   { opacity: 1; transform: translateX(0);     background: transparent; }
+}
+tr.new-row { animation: rowIn 0.35s ease forwards; }
+
+/* ── Responsive: laptimer ───────────────────────────────────── */
+@media (max-width: 640px) {
+  header.laptimer-header { padding: 0 16px; }
+
+  main.laptimer-main { padding: 20px 14px 40px; gap: 14px; }
+
+  .laptimer-controls { grid-template-columns: 1fr 1fr; }
+  .btn-lap           { grid-column: span 2; }
+
+  .lap-info-row { grid-template-columns: 1fr 1fr; }
+  .lap-info-row .info-box:last-child { grid-column: span 2; }
+
+  .table-section thead th,
+  .table-section tbody td { padding: 8px 10px; }
+  .table-section tbody td:nth-child(2) { font-size: 16px; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   LAPTIMER PAGINA  (rondetijd.html)
+   Gebruikt dezelfde variabelen en fonts als KartPit main style.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Header ─────────────────────────────────────────────────── */
+header.laptimer-header {
+  background:    var(--bg2);
+  border-bottom: 2px solid var(--red);
+  box-shadow:    0 2px 20px rgba(248,171,33,0.15);
+  position:      sticky;
+  top: 0; z-index: 100;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+[data-theme="dark"] header.laptimer-header {
+  box-shadow: 0 2px 32px rgba(248,171,33,0.35);
+}
+
+header.laptimer-header .logo-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+header.laptimer-header h1 {
+  font-family:    var(--font-display);
+  font-size:      28px;
+  letter-spacing: 3px;
+  color:          var(--red);
+  line-height:    1;
+}
+header.laptimer-header .subtitle {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    600;
+  letter-spacing: 3px;
+  color:          var(--text3);
+  text-transform: uppercase;
+  display:        block;
+  margin-top:     1px;
+}
+header.laptimer-header .session-info {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color:          var(--text3);
+  border:         1px solid var(--border2);
+  padding:        6px 14px;
+  border-radius:  var(--radius);
+  transition:     color .2s, border-color .2s, box-shadow .2s;
+}
+header.laptimer-header .session-info.active {
+  color:        var(--green);
+  border-color: var(--green);
+  box-shadow:   0 0 10px rgba(0,200,83,0.25);
+}
+
+/* ── Main layout ─────────────────────────────────────────────── */
+main.laptimer-main {
+  max-width: 860px;
+  margin:    0 auto;
+  padding:   32px 24px 60px;
+  display:   flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Timer card ──────────────────────────────────────────────── */
+.timer-section {
+  background:    var(--card);
+  border:        1px solid var(--border);
+  border-top:    3px solid var(--red);
+  border-radius: var(--radius-lg);
+  padding:       32px 28px 24px;
+  box-shadow:    var(--shadow);
+  text-align:    center;
+  position:      relative;
+  overflow:      hidden;
+}
+.timer-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-conic-gradient(rgba(0,0,0,.006) 0% 25%, transparent 0% 50%) 0 0/40px 40px;
+  pointer-events: none;
+}
+[data-theme="dark"] .timer-section::before {
+  background: repeating-conic-gradient(rgba(255,255,255,.003) 0% 25%, transparent 0% 50%) 0 0/40px 40px;
+}
+
+.timer-section .timer-label {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color:          var(--text3);
+  margin-bottom:  6px;
+  position:       relative;
+}
+
+/* Override the generic .timer-display (pitstop timer, 120px) */
+.timer-section .timer-display {
+  font-family:    var(--font-display);
+  font-size:      clamp(3.5rem, 11vw, 6rem);
+  letter-spacing: 4px;
+  color:          var(--text);
+  line-height:    1;
+  margin-bottom:  8px;
+  padding:        0;
+  text-align:     center;
+  position:       relative;
+  transition:     color .2s;
+}
+.timer-section .timer-display.running {
+  color:     var(--text);
+  animation: laptimer-pulse 1.6s ease-in-out infinite;
+}
+@keyframes laptimer-pulse {
+  0%, 100% { text-shadow: none; }
+  50%       { text-shadow: 0 0 28px rgba(229,0,117,0.45); }
+}
+[data-theme="dark"] .timer-section .timer-display.running {
+  animation: laptimer-pulse-dark 1.6s ease-in-out infinite;
+}
+@keyframes laptimer-pulse-dark {
+  0%, 100% { text-shadow: none; }
+  50%       { text-shadow: 0 0 28px rgba(255,38,148,0.55); }
+}
+
+.timer-section .total-label {
+  font-family:     var(--font-ui);
+  font-size:       11px;
+  font-weight:     600;
+  letter-spacing:  2px;
+  color:           var(--text3);
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             8px;
+  position:        relative;
+}
+.timer-section .total-label #totalDisplay {
+  font-size:      14px;
+  font-weight:    600;
+  color:          var(--text2);
+  letter-spacing: 1px;
+}
+
+/* ── Info boxes ───────────────────────────────────────────────── */
+.lap-info-row {
+  display:               grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:        12px;
+  margin-top: 20px;
+  position:   relative;
+}
+.info-box {
+  background:     var(--bg3);
+  border:         1px solid var(--border);
+  border-radius:  var(--radius);
+  padding:        14px 8px;
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            4px;
+}
+.info-label {
+  font-family:    var(--font-ui);
+  font-size:      9px;
+  font-weight:    700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color:          var(--text3);
+}
+.info-value {
+  font-family:    var(--font-display);
+  font-size:      1.4rem;
+  letter-spacing: 1px;
+  color:          var(--text2);
+}
+.info-value.best   { color: var(--yellow); }
+.info-value.faster { color: var(--green);  }
+.info-value.slower { color: #ff3d5a;       }
+
+/* ── Controls ─────────────────────────────────────────────────── */
+.laptimer-controls {
+  display:               grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 12px;
+}
+.btn-start {
+  background:   transparent;
+  border-color: var(--green);
+  color:        var(--green);
+}
+.btn-start:hover {
+  background: rgba(0,200,83,0.1);
+  box-shadow: 0 0 14px rgba(0,200,83,0.3);
+}
+.btn-lap {
+  background:   var(--red);
+  border-color: var(--red);
+  color:        #0a0a0a;
+}
+.btn-lap:hover {
+  background:   var(--red-dim);
+  border-color: var(--red-dim);
+  box-shadow:   0 0 18px rgba(248,171,33,0.45);
+}
+.btn-lap:active { transform: scale(0.97); }
+.btn-stop {
+  background:   transparent;
+  border-color: #ff3d5a;
+  color:        #ff3d5a;
+}
+.btn-stop:hover {
+  background: rgba(255,61,90,0.1);
+  box-shadow: 0 0 14px rgba(255,61,90,0.3);
+}
+
+/* ── Rondetabel ───────────────────────────────────────────────── */
+.table-section {
+  background:    var(--card);
+  border:        1px solid var(--border);
+  border-top:    3px solid var(--red);
+  border-radius: var(--radius-lg);
+  box-shadow:    var(--shadow);
+  overflow:      hidden;
+}
+.table-header {
+  display:         flex;
+  align-items:     center;
+  justify-content: space-between;
+  padding:         14px 20px;
+  border-bottom:   1px solid var(--border);
+  background:      var(--bg2);
+}
+.table-header h2 {
+  font-family:    var(--font-display);
+  font-size:      22px;
+  letter-spacing: 3px;
+  color:          var(--text);
+}
+.btn-export {
+  font-family:    var(--font-ui);
+  font-size:      11px;
+  font-weight:    700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding:        7px 14px;
+  background:     transparent;
+  border:         1px solid var(--yellow);
+  color:          var(--yellow);
+  border-radius:  var(--radius);
+  cursor:         pointer;
+  transition:     background .18s, box-shadow .18s;
+}
+.btn-export:not(:disabled):hover {
+  background: rgba(255,215,0,0.1);
+  box-shadow: 0 0 12px rgba(255,215,0,0.3);
+}
+.btn-export:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.table-wrap { overflow-x: auto; }
+.table-section table { width: 100%; border-collapse: collapse; }
+.table-section thead th {
+  font-family:    var(--font-ui);
+  font-size:      10px;
+  font-weight:    700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color:          var(--text3);
+  padding:        10px 16px;
+  text-align:     left;
+  border-bottom:  1px solid var(--border);
+  white-space:    nowrap;
+  background:     var(--bg2);
+}
+.table-section tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition:    background .15s;
+}
+.table-section tbody tr:last-child { border-bottom: none; }
+.table-section tbody tr:hover      { background: rgba(248,171,33,0.05); }
+.table-section tbody td {
+  font-family: var(--font-ui);
+  font-size:   15px;
+  padding:     12px 16px;
+  color:       var(--text2);
+}
+.table-section tbody td:first-child {
+  font-family:    var(--font-display);
+  font-size:      18px;
+  letter-spacing: 1px;
+  color:          var(--text3);
+}
+.table-section tbody td:nth-child(2) {
+  font-family:    var(--font-display);
+  font-size:      20px;
+  letter-spacing: 1px;
+  color:          var(--text);
+}
+tr.best-row td:nth-child(2) {
+  color:       var(--yellow);
+  text-shadow: 0 0 10px rgba(255,215,0,0.35);
+}
+.empty-row td {
+  text-align:     center;
+  color:          var(--text3);
+  font-family:    var(--font-ui);
+  font-size:      13px;
+  letter-spacing: 1.5px;
+  padding:        40px;
+}
+
+/* ── Lap badges ───────────────────────────────────────────────── */
+.badge-best   { background: rgba(255,215,0,0.12);  border: 1px solid var(--yellow); color: var(--yellow); }
+.badge-fast   { background: rgba(0,200,83,0.1);    border: 1px solid var(--green);  color: var(--green);  }
+.badge-slow   { background: rgba(255,61,90,0.1);   border: 1px solid #ff3d5a;       color: #ff3d5a;       }
+.badge-normal { background: rgba(248,171,33,0.07); border: 1px solid var(--border2);color: var(--text3);  }
+.diff-fast    { color: var(--green); }
+.diff-slow    { color: #ff3d5a; }
+
+/* ── Nieuwe rij animatie ──────────────────────────────────────── */
+@keyframes rowIn {
+  from { opacity: 0; transform: translateX(-10px); background: rgba(248,171,33,0.08); }
+  to   { opacity: 1; transform: translateX(0);     background: transparent; }
+}
+tr.new-row { animation: rowIn 0.35s ease forwards; }
+
+/* ── Responsive: laptimer ─────────────────────────────────────── */
+@media (max-width: 640px) {
+  header.laptimer-header  { padding: 0 16px; }
+  main.laptimer-main      { padding: 20px 14px 40px; gap: 14px; }
+  .laptimer-controls      { grid-template-columns: 1fr 1fr; }
+  .btn-lap                { grid-column: span 2; }
+  .lap-info-row           { grid-template-columns: 1fr 1fr; }
+  .lap-info-row .info-box:last-child { grid-column: span 2; }
+  .table-section thead th,
+  .table-section tbody td { padding: 8px 10px; }
+  .table-section tbody td:nth-child(2) { font-size: 16px; }
+}
